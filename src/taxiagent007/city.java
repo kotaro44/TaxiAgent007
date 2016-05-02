@@ -31,7 +31,7 @@ public class city extends Canvas {
     }
     
     public void updateCity(){
-        x++;
+        x+=5;
         this.repaint();
     }
     
