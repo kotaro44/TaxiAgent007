@@ -5,25 +5,24 @@
  */
 package taxiagent007;
 
+import jade.core.Agent;
 import java.awt.Color;
-import java.awt.Graphics;
-
 /**
  *
  * @author kotaro and fabio :)
  */
 
-public class Taxi {
+public class Taxi extends Agent {
     public int x;
     public int y;
     public Color color;
     public int speed = 1;
     
-    public Taxi(int x ,int y , Color color){
+    /*public Taxi(int x ,int y , Color color){
         this.x = x;
         this.y = y;
         this.color = color;
-    }
+    }*/
     
     public boolean drive(Direction dir,City city){
         switch(dir){
@@ -41,5 +40,10 @@ public class Taxi {
                 break;
         }
         return true;
+    }
+    
+    @Override
+     protected void setup() {
+        System.out.println("Hallo! Buyer-agent "+getAID().getName()+ " is ready.");
     }
 }
