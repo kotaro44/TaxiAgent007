@@ -10,9 +10,12 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
+import java.util.PriorityQueue;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 
 /**
  *
@@ -26,8 +29,11 @@ public class City extends JPanel {
     private int h;
     private int w;
     private Image road_texture;
-    private Taxi taxis[];
     private ArrayList<Passenger> passengers = new ArrayList<>();
+    public Company company;
+    ArrayList<Road> edges;
+    DijkstraAlgorithm dijkstra;
+    Graph graph;
     
     public int totalCalls = 0;
 
@@ -51,15 +57,60 @@ public class City extends JPanel {
                             {50, 15, 50, 29}, 
                             {29, 29, 29, 50}};
     
-    private int[][] intersections_init = {{1,1},{15,1},{43,1},{57,1},{86,1},{100,1},
-                                     {1,15},{15,15},{43,15},{57,15},{86,15},{100,15},
-                                     {1,22},{15,22},{43,22},{57,22},{86,22},{100,22},
-                                     {1,29},{15,29},{43,29},{57,29},{86,29},{100,29},
-                                     {1,36},{15,36},{43,36},{57,36},{86,36},{100,36},
-                                     {1,50},{15,50},{43,50},{57,50},{86,50},{100,50},
-                                     {50,15},{50,22},{50,29},
-                                     {29,29},{29,36},{29,50}};
-    private Intersection[] intersections;
+    private int[][] intersections_init = {
+        //1st horizontal line
+        {1,1,1,6},//0
+        {15,1,0,2,7},//1
+        {43,1,1,3,8},//2
+        {57,1,2,4,9},//3
+        {86,1,3,5,10},//4
+        {100,1,4,11},//5
+        //2nd horizontal line
+        {1,15,0,7,12},//6
+        {15,15,1,6,8,13},//7
+        {43,15,2,7,39,14},//8
+        {57,15,3,8,10,15},//9
+        {86,15,4,9,11,16},//10
+        {100,15,5,10,17},//11
+        //3rd horizontal line
+        {1,22,6,13,18},//12
+        {15,22,7,12,14,19},//13
+        {43,22,8,13,40,20},//14
+        {57,22,9,40,16,21},//15
+        {86,22,10,15,17,22},//16
+        {100,22,11,16,23},//17
+        //4th horizontal line
+        {1,29,12,19,24},//18
+        {15,29,13,18,36,25},//19
+        {43,29,14,36,41,26},//20
+        {57,29,15,41,22,27},//21
+        {86,29,16,21,23,28},//22
+        {100,29,17,22,29},//23
+        //5th horizontal line
+        {1,36,18,25,30},//24
+        {15,36,19,24,37,31},//25
+        {43,36,20,37,27,32},//26
+        {57,36,21,26,28,33},//27
+        {86,36,22,27,29,34},//28
+        {100,36,23,28,35},//29
+        //6th horizontal line
+        {1,50,24,31},//30
+        {15,50,25,30,38},//31
+        {43,50,26,38,33},//32
+        {57,50,27,32,34},//33
+        {86,50,28,33,35},//34
+        {100,50,29,34},//35
+        //1st vertocal line
+        {29,29,19,20,37},//36
+        {29,36,36,25,26,38},//37
+        {29,50,37,31,32},//38
+        //2nd vertical line
+        {50,15,8,9,40},//39
+        {50,22,39,14,15,41},//40
+        {50,29,40,20,21}//41
+    };
+    
+    public Intersection[] intersections;
     
     
     //behaviour variables
@@ -71,12 +122,14 @@ public class City extends JPanel {
             File pathToFile = new File("road.jpg");
             road_texture = ImageIO.read(pathToFile);
             this.generateCity();
+            
         } catch (IOException ex) {
             
         }
         
         this.h = (this.height - this.margin_y*2)*2;
         this.w = this.width - this.margin_x*2;
+       
     }
     
     public double poisson( double k ){
@@ -90,14 +143,28 @@ public class City extends JPanel {
     }
     
     private void generateCity(){
-        this.taxis = new Taxi[1];
-        /*this.taxis[0] = new Taxi(this.taxi_center[0],this.taxi_center[1],Color.ORANGE);*/
-        
         this.intersections = new Intersection[this.intersections_init.length];
+        //create all intersections
         for( int i = 0 ; i <  this.intersections_init.length ; i++ ){
-            this.intersections[i] = new Intersection(this.intersections_init[i][0],this.intersections_init[i][1]);
+            this.intersections[i] = new Intersection(this.intersections_init[i][0],this.intersections_init[i][1],i);
         }
+        
+        //create all adjacencies
+        int id = 0;
+        this.edges = new ArrayList<>();
+        for( int i = 0 ; i <  this.intersections_init.length ; i++ ){
+            for (int j = 2; j < this.intersections_init[i].length; j++) {
+                Intersection dest = this.intersections[this.intersections_init[i][j]];
+                Road r = new Road( id++ , this.intersections[i] , dest , this.intersections[i].distance(dest) );
+                this.edges.add(  r );
+            }
+        }
+        
+        this.graph = new Graph(this.intersections, this.edges);
+        this.dijkstra = new DijkstraAlgorithm(this.graph);
+      
     }
+    
     
     private void drawRoad( int x1 , int y1 , int x2 , int y2 , Graphics g ){
         int img_size = 30;
@@ -115,8 +182,14 @@ public class City extends JPanel {
         }
     }
     
+    public void setCompany( Company company ){
+        this.company = company;
+    }
+    
     @Override
     public void paint(Graphics g){
+        if( company == null )
+            return;
         g.clearRect(0, 0, width, height);
         
         g.setColor(Color.GRAY);
@@ -152,10 +225,12 @@ public class City extends JPanel {
         g.fillRect( 22 + scaleX(this.taxi_center[0]) ,  scaleY(this.taxi_center[1]) - 35, 30 , 30 ); 
         
         //draw Taxis
-        for (Taxi taxi : this.taxis) {
+        int tr = 10;
+        for ( int i = 0 ; i < this.company.taxis.size() ; i++ ) {
+            Taxi taxi = this.company.taxis.get(i);
             if( taxi != null ){
                 g.setColor(taxi.color);
-                g.fillOval( scaleX(taxi.x) , scaleY(taxi.x), 10, 10);
+                g.fillOval( scaleX(taxi.x) - tr/2, scaleY(taxi.y)- tr/2, tr, tr);
             }
         }
 
@@ -165,8 +240,16 @@ public class City extends JPanel {
         return this.margin_x + this.w*x/100;
     }
     
+    public int scaleX( double x ){
+        return (int)(this.margin_x + this.w*x/100);
+    }
+    
     public int scaleY( int y ){
         return this.margin_y + this.h*y/100;
+    }
+    
+    public int scaleY( double y ){
+        return (int)(this.margin_y + this.h*y/100);
     }
     
     public void updateCity(){
@@ -192,5 +275,19 @@ public class City extends JPanel {
             intersection.passenger = null;
         }
     }
+
+    public Intersection getNearestIntersection(double x, double y) {
+        Intersection nearest = this.intersections[0];
+        for (int i = 1; i < this.intersections.length; i++) {
+            if( nearest.distance(x,y) > this.intersections[i].distance(x, y) ){
+                nearest = this.intersections[i];
+            }
+        }
+        return nearest;
+    }
     
+    public LinkedList<Intersection> getShortestPath( Intersection from, Intersection to){
+        dijkstra.execute(from);
+        return dijkstra.getPath(to);
+    }
 }

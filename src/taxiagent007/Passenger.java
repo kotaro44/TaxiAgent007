@@ -38,4 +38,9 @@ public class Passenger {
         double m = 2*7;
         return (1/(sigma*Math.sqrt(2*Math.PI)))*Math.pow(Math.E, -1*Math.pow(d - m, 2)/2 )*sigma;
     }
+    
+    @Override
+    public String toString(){
+        return "passenger";
+    }
 }

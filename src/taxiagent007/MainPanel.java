@@ -7,6 +7,8 @@ package taxiagent007;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
@@ -362,9 +364,21 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
             @Override
             public void run() {
                 MainPanel window = new MainPanel( MainPanel.st_company );
+                
+                window.addComponentListener(new ComponentAdapter() {
+                    @Override
+                    public void componentHidden(ComponentEvent e) 
+                    {
+                        /* code run when component hidden*/
+                    }
+                    @Override
+                    public void componentShown(ComponentEvent e) {
+                        window.company.onPanelReady(window);
+                    }
+                });
+                
                 window.setVisible(true);
                 window.initAnimation();
-                window.company.onPanelReady(window);
             }
          
         });
@@ -378,8 +392,8 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
     static Company st_company;
     private Company company;
     private Timer city_timer;
-    private boolean running;
-    private City city;
+    public boolean running;
+    public City city;
     String text2write = "";
     int characters = 0;
 

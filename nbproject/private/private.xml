@@ -5,6 +5,9 @@
         <group>
             <file>file:/C:/Users/kotaro/Documents/NetBeansProjects/TaxiAgent007/src/taxiagent007/City.java</file>
             <file>file:/C:/Users/kotaro/Documents/NetBeansProjects/TaxiAgent007/src/taxiagent007/Direction.java</file>
+            <file>file:/C:/Users/kotaro/Documents/NetBeansProjects/TaxiAgent007/src/taxiagent007/Company.java</file>
+            <file>file:/C:/Users/kotaro/Documents/NetBeansProjects/TaxiAgent007/src/taxiagent007/DriveBehaviour.java</file>
+            <file>file:/C:/Users/kotaro/Documents/NetBeansProjects/TaxiAgent007/src/taxiagent007/Driver.java</file>
             <file>file:/C:/Users/kotaro/Documents/NetBeansProjects/TaxiAgent007/src/taxiagent007/MainPanel.java</file>
             <file>file:/C:/Users/kotaro/Documents/NetBeansProjects/TaxiAgent007/src/taxiagent007/Taxi.java</file>
         </group>

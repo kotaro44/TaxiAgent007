@@ -5,45 +5,78 @@
  */
 package taxiagent007;
 
-import jade.core.Agent;
 import java.awt.Color;
 /**
  *
  * @author kotaro and fabio :)
  */
 
-public class Taxi extends Agent {
-    public int x;
-    public int y;
+public class Taxi  {
+    public double x;
+    public double y;
     public Color color;
-    public int speed = 1;
+    public double speed = 30.0*7.0; //30km/h   scale=7
+    public double frame = 16;
     
-    /*public Taxi(int x ,int y , Color color){
+    private int actual = 0;
+    private int last = 0;
+    private int elapsed = 0;
+    private int total = 0;
+    
+    private boolean moving = false;
+    
+    public Taxi( int x , int y , Color color ){
         this.x = x;
         this.y = y;
         this.color = color;
-    }*/
+        
+        this.speed = ((this.speed/60)/60); //units/minute
+    }
     
-    public boolean drive(Direction dir,City city){
-        switch(dir){
-            case RIGHT:
-                    this.x += this.speed;
-                break;
-            case LEFT:
-                    this.x -= this.speed;
-                break;
-            case DOWN:
-                    this.y += this.speed;
-                break;
-            case UP:
-                    this.y -= this.speed;
-                break;
+    private boolean move(){
+        actual = (int) System.currentTimeMillis();
+        elapsed = actual - last;
+        
+        if( !moving ){
+            moving = true;
+            total = 0;
+            return false;
+        }else{
+            total += elapsed;
+            if( total >= this.frame ){
+                total = 0;
+                return true;
+            }
+            return false;
         }
-        return true;
+    }
+    
+    public void goRight(){
+        if( this.move() )
+            this.x += this.speed;
+        last = actual;
+    }
+    
+    public void goLeft(){
+        if( this.move() )
+            this.x -= this.speed;
+        last = actual;
+    }
+    
+    public void goUp(){
+        if( this.move() )
+            this.y -= this.speed;
+        last = actual;
+    }
+    
+    public void goDown(){
+        if( this.move() )
+            this.y += this.speed;
+        last = actual;
     }
     
     @Override
-     protected void setup() {
-        System.out.println("Hallo! Buyer-agent "+getAID().getName()+ " is ready.");
+    public String toString(){
+        return "{" + this.x + "," + this.y + "}";
     }
 }
