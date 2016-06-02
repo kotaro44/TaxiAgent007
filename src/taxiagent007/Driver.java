@@ -24,19 +24,20 @@ public class Driver extends Agent {
         this.taxi = (Taxi)args[0];
         this.city = (City)args[1];
         System.out.println("Driver is ready!");
-        
-        Intersection dest = city.intersections[(int)args[2]];
-        
+        this.AddBehaviour();
+    }
+     
+    public void AddBehaviour(){
+        Driver self = this;
         Behaviour b;
-        b = new DriveBehaviour( taxi , city , dest ){
+        b = new DriveBehaviour( taxi , city  ){
             @Override
             public int onEnd(){
-                
+                self.AddBehaviour();
                 return 0;
             }
         };
         this.addBehaviour( b );
-        
     }
         
     @Override
