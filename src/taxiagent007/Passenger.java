@@ -41,6 +41,6 @@ public class Passenger {
     
     @Override
     public String toString(){
-        return "passenger";
+        return "Passenger in " + this.origin + " wants to go to " + this.destination;
     }
 }

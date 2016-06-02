@@ -7,7 +7,6 @@ package taxiagent007;
 
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
-import java.awt.Color;
 
 /**
  *
@@ -24,7 +23,9 @@ public class Driver extends Agent {
         this.taxi = (Taxi)args[0];
         this.city = (City)args[1];
         System.out.println("Driver is ready!");
-        this.AddBehaviour();
+        //this.AddBehaviour();
+        Behaviour b = new WaitForCallBehaviour();
+        this.addBehaviour(b);   
     }
      
     public void AddBehaviour(){

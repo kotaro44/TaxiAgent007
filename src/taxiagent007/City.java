@@ -40,7 +40,7 @@ public class City extends JPanel {
     
     //behaviour variables
     int lambda = 1;
-    int k = 9;
+    int k = 4;
 
     
     private int[] taxi_center = {56,28};
@@ -264,6 +264,7 @@ public class City extends JPanel {
                Passenger new_passenger = new Passenger( intersection , this.intersections );
                this.passengers.add(new_passenger);
                intersection.receiveCall( new_passenger );
+               this.company.callTaxi(new_passenger);
                this.totalCalls++;
            }
        }

@@ -5,7 +5,9 @@
  */
 package taxiagent007;
 
+import jade.core.AID;
 import jade.core.Agent;
+import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
@@ -22,9 +24,9 @@ public class Company extends Agent {
     boolean ready = false;
     MainPanel mainpanel;
     ArrayList<Taxi> taxis = new ArrayList<>();
-    Object[][] taxi_props = {{1,1,Color.ORANGE,"TaxiDriver1"},
+    Object[][] taxi_props = {{1,1,Color.ORANGE,"TaxiDriver1"}};/*,
                              {15,50,Color.BLACK,"TaxiDriver2"},
-                             {100,1,Color.WHITE,"TaxiDriver3"}};
+                             {100,1,Color.WHITE,"TaxiDriver3"}};*/
     
     public void onPanelReady(MainPanel mainpanel){
         this.mainpanel = mainpanel;
@@ -42,11 +44,24 @@ public class Company extends Agent {
                 taxi[2] = (int)Math.floor( this.mainpanel.city.intersections.length*Math.random() );
                 AgentController new_agent = cc.createNewAgent((String)props[3], "taxiagent007.Driver", taxi );
                 new_agent.start();
+                
                 this.taxis.add((Taxi)taxi[0]);
             }
         } catch (StaleProxyException ex) {
             Logger.getLogger(Company.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public void callTaxi( Passenger passenger ){
+        System.out.println("Received a call from: " + passenger );
+        
+        //Ask Taxi to get this passenger
+        ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+        msg.addReceiver(new AID("TaxiDriver1", AID.ISLOCALNAME));
+        msg.setLanguage("English");
+        msg.setOntology("Take-Passenger");
+        msg.setContent(passenger.toString());
+        send(msg);
     }
     
     @Override
