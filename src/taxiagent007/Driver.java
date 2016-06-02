@@ -34,6 +34,7 @@ public class Driver extends Agent {
             @Override
             public int onEnd(){
                 self.AddBehaviour();
+                System.out.println("Hello");
                 return 0;
             }
         };

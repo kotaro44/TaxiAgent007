@@ -35,7 +35,7 @@ public class City extends JPanel {
     
     public int totalCalls = 0;
     
-    public Intersection[] intersections;
+    public Intersection[] intersections; //ver aqui
     
     
     //behaviour variables
@@ -289,5 +289,10 @@ public class City extends JPanel {
     public LinkedList<Intersection> getShortestPath( Intersection from, Intersection to){
         dijkstra.execute(from);
         return dijkstra.getPath(to);
+    }
+    
+    public Intersection[] getIntersections() //just in case we need a copy of intersections[]
+    {
+        return intersections.clone();
     }
 }

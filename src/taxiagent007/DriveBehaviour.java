@@ -39,6 +39,7 @@ public class DriveBehaviour extends Behaviour {
         this.origin = city.getNearestIntersection( taxi.x , taxi.y );
         do {
             this.dest = city.intersections[(int)Math.floor(city.intersections.length*Math.random())];
+            /*this.dest = city.getIntersections()[(int)Math.floor(city.getIntersections().length*Math.random())];*/
         } while( this.dest == this.origin );
         
         this.path = city.getShortestPath( this.origin , this.dest );

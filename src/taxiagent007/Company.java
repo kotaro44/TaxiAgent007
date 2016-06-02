@@ -41,8 +41,18 @@ public class Company extends Agent {
                 taxi[1] = this.mainpanel.city;
                 taxi[2] = (int)Math.floor( this.mainpanel.city.intersections.length*Math.random() );
                 AgentController new_agent = cc.createNewAgent((String)props[3], "taxiagent007.Driver", taxi );
+
                 new_agent.start();
-                this.taxis.add((Taxi)taxi[0]);
+                
+                //delay propositado para os agents nao acessarem this.taxis ao mesmo tempo
+                try {
+                    Thread.sleep(1000);                 //1000 milliseconds is one second.
+                    } catch(InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+               
+                //os 3 taxis estavam a accessar esse lista ao mesmo tempo, causando erro.
+                this.taxis.add((Taxi)taxi[0]); 
             }
         } catch (StaleProxyException ex) {
             Logger.getLogger(Company.class.getName()).log(Level.SEVERE, null, ex);
