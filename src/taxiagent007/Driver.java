@@ -27,12 +27,14 @@ public class Driver extends Agent {
         
         Intersection dest = city.intersections[(int)args[2]];
         
-        Behaviour b = new DriveBehaviour( taxi , city , dest ){
-            protected void onDone(){
-                System.out.println("DONE???");
+        Behaviour b;
+        b = new DriveBehaviour( taxi , city , dest ){
+            @Override
+            public int onEnd(){
+                
+                return 0;
             }
         };
-        System.out.println(b);
         this.addBehaviour( b );
         
     }
