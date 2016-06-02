@@ -15,8 +15,8 @@ public class Taxi  {
     public double x;
     public double y;
     public Color color;
-    public double speed = 30.0*7.0; //30km/h   scale=7
-    public double frame = 16;
+    public double speed = (30.0*7.0)/60; //30km/h   scale=7
+    public double frame = 1;
     
     private int actual = 0;
     private int last = 0;
@@ -29,12 +29,10 @@ public class Taxi  {
         this.x = x;
         this.y = y;
         this.color = color;
-        
-        this.speed = ((this.speed/60)/60); //units/minute
     }
     
     private boolean move(){
-        actual = (int) System.currentTimeMillis();
+        actual = (int) MainPanel.total_minutes;
         elapsed = actual - last;
         
         if( !moving ){

@@ -17,6 +17,9 @@ import javax.swing.Timer;
  * @author kotaro and fabio :)
  */
 public class MainPanel extends javax.swing.JFrame implements ActionListener {
+    
+    static int total_minutes = 0;
+    static int minutes = 0;
 
     /**
      * Creates new form MainPanel
@@ -68,6 +71,7 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
         poisson_label = new javax.swing.JLabel();
         calls_label = new javax.swing.JLabel();
         anim_slider = new javax.swing.JSlider();
+        totalminutes_label = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         console = new javax.swing.JTextArea();
@@ -127,6 +131,8 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
             }
         });
 
+        totalminutes_label.setText("0 minutes");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -153,6 +159,10 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addComponent(anim_slider, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addContainerGap())
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(totalminutes_label)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -167,6 +177,8 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
                 .addComponent(poisson_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(calls_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(totalminutes_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(anim_slider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -175,6 +187,8 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
                     .addComponent(time_label))
                 .addContainerGap())
         );
+
+        totalminutes_label.getAccessibleContext().setAccessibleName("totalminutes_label");
 
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -247,21 +261,27 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void time_sliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_time_sliderStateChanged
-        this.updateLabels();
+        
+        if( MainPanel.minutes < this.time_slider.getValue() )
+            MainPanel.total_minutes += (this.time_slider.getValue() - MainPanel.minutes);
+        MainPanel.minutes = this.time_slider.getValue();
+        
         //set lambda
-        if( this.time_slider.getValue() >= 7*60 && this.time_slider.getValue() <= 9*60 )
+        if( MainPanel.minutes >= 7*60 && MainPanel.minutes <= 9*60 )
             city.lambda = 3;
-        else if( this.time_slider.getValue() >= 17*60 && this.time_slider.getValue() <= 19*60 )
+        else if( MainPanel.minutes >= 17*60 && MainPanel.minutes <= 19*60 )
             city.lambda = 3;
-        else if( this.time_slider.getValue() > 9*60 && this.time_slider.getValue() <= 17*60 )
+        else if( MainPanel.minutes > 9*60 && MainPanel.minutes <= 17*60 )
             city.lambda = 2;
-        else if( this.time_slider.getValue() > 19*60 && this.time_slider.getValue() <= 23*60 )
+        else if( MainPanel.minutes > 19*60 && MainPanel.minutes <= 23*60 )
             city.lambda = 2;
         else
             city.lambda = 1;
         
         this.lambda_label.setText( "λ = " + city.lambda);
         this.poisson_label.setText( "p(" + city.k + ") = " + city.poisson(city.k ));
+        
+        this.updateLabels();
     }//GEN-LAST:event_time_sliderStateChanged
 
     private void anim_sliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_anim_sliderStateChanged
@@ -272,16 +292,17 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
 
     private void updateLabels(){
         //time label
-        int hour = (this.time_slider.getValue()/60)%12;
+        int hour = (MainPanel.minutes/60)%12;
         if( hour == 0 )
             hour = 12;
-        int minutes = this.time_slider.getValue()%60;
-        String xm = (this.time_slider.getValue()<60*12)?"A.M.":"P.M.";
+        int minutes = MainPanel.minutes%60;
+        String xm = (MainPanel.minutes<60*12)?"A.M.":"P.M.";
         
         this.time_label.setText( hour + ":" + minutes + " " + xm );
         
         //calls label
         this.calls_label.setText(city.totalCalls + " call(s)");
+        this.totalminutes_label.setText( MainPanel.total_minutes + " minutes");
     }
     
     private void update(){
@@ -412,5 +433,6 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
     private javax.swing.JLabel poisson_label;
     private javax.swing.JLabel time_label;
     private javax.swing.JSlider time_slider;
+    private javax.swing.JLabel totalminutes_label;
     // End of variables declaration//GEN-END:variables
 }
