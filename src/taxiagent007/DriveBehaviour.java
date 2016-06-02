@@ -15,6 +15,7 @@ import java.util.LinkedList;
 public class DriveBehaviour extends Behaviour {
 
     Taxi taxi;
+    Intersection origin;
     Intersection dest;
     City city;
     int actual;
@@ -25,7 +26,22 @@ public class DriveBehaviour extends Behaviour {
         this.dest = dest;
         this.city = city;
         this.actual = 0;
-        this.path = city.getShortestPath(city.getNearestIntersection( taxi.x , taxi.y ) , dest );
+        this.origin = city.getNearestIntersection( taxi.x , taxi.y );
+        this.path = city.getShortestPath( this.origin , dest );
+    }
+    
+    //random destiny
+    public DriveBehaviour( Taxi taxi , City city  ){
+        this.taxi = taxi;
+        this.city = city;
+        this.actual = 0;
+        
+        this.origin = city.getNearestIntersection( taxi.x , taxi.y );
+        do {
+            this.dest = city.intersections[(int)Math.floor(city.intersections.length*Math.random())];
+        } while( this.dest == this.origin );
+        
+        this.path = city.getShortestPath( this.origin , this.dest );
     }
     
 
@@ -39,13 +55,13 @@ public class DriveBehaviour extends Behaviour {
 
             if( taxi.x != nearestDest.x ){
                 if( taxi.x < nearestDest.x ){
-                    if( taxi.x + taxi.speed >= nearestDest.x ){
+                    if( taxi.x + taxi.speed*MainPanel.frame >= nearestDest.x ){
                         taxi.x = nearestDest.x;
                     }else{
                         taxi.goRight();
                     }
                 }else{
-                    if( taxi.x - taxi.speed <= nearestDest.x ){
+                    if( taxi.x - taxi.speed*MainPanel.frame <= nearestDest.x ){
                         taxi.x = nearestDest.x;
                     }else{
                         taxi.goLeft();
@@ -55,13 +71,13 @@ public class DriveBehaviour extends Behaviour {
 
             if( taxi.y != nearestDest.y ){
                 if( taxi.y < nearestDest.y ){
-                    if( taxi.y + taxi.speed >= nearestDest.y ){
+                    if( taxi.y + taxi.speed*MainPanel.frame >= nearestDest.y ){
                         taxi.y = nearestDest.y;
                     }else{
                         taxi.goDown();
                     }
                 }else{
-                    if( taxi.y - taxi.speed <= nearestDest.y ){
+                    if( taxi.y - taxi.speed*MainPanel.frame <= nearestDest.y ){
                         taxi.y = nearestDest.y;
                     }else{
                         taxi.goUp();
@@ -71,13 +87,14 @@ public class DriveBehaviour extends Behaviour {
 
             if( taxi.y == nearestDest.y && taxi.x == nearestDest.x ){
                 if( ++actual >= this.path.size() ){
-                    this.actual = 0;
+                    /******We arrive at destination*****/
+                    /*this.actual = 0;
                     Intersection new_dest;
                     Intersection origin = city.getNearestIntersection( taxi.x , taxi.y );
                     do {
                         new_dest = city.intersections[(int)Math.floor(city.intersections.length*Math.random())];
                     } while( new_dest == origin );
-                    this.path = city.getShortestPath( origin , new_dest  );
+                    this.path = city.getShortestPath( origin , new_dest  );*/
                 }
             }
         }
@@ -85,7 +102,7 @@ public class DriveBehaviour extends Behaviour {
 
     @Override
     public boolean done() {
-        return false;
+        return this.dest.x == this.taxi.x && this.dest.y == this.taxi.y;
     }
     
     @Override

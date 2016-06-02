@@ -15,8 +15,7 @@ public class Taxi  {
     public double x;
     public double y;
     public Color color;
-    public double speed = (30.0*7.0)/60; //30km/h   scale=7
-    public double frame = 1;
+    public double speed = (((30.0*7.0)/60)/60); //30km/h   scale=7 transformed to seconds
     
     private int actual = 0;
     private int last = 0;
@@ -31,45 +30,41 @@ public class Taxi  {
         this.color = color;
     }
     
-    private boolean move(){
-        actual = (int) MainPanel.total_minutes;
+    private double move(){
+        actual = (int) MainPanel.total_seconds;
         elapsed = actual - last;
         
         if( !moving ){
             moving = true;
             total = 0;
-            return false;
+            return 0;
         }else{
             total += elapsed;
-            if( total >= this.frame ){
+            if( total >= MainPanel.frame ){
                 total = 0;
-                return true;
+                return this.speed*MainPanel.frame;
             }
-            return false;
+            return 0;
         }
     }
     
     public void goRight(){
-        if( this.move() )
-            this.x += this.speed;
+        this.x += this.move();
         last = actual;
     }
     
     public void goLeft(){
-        if( this.move() )
-            this.x -= this.speed;
+        this.x -= this.move();
         last = actual;
     }
     
     public void goUp(){
-        if( this.move() )
-            this.y -= this.speed;
+        this.y -= this.move();
         last = actual;
     }
     
     public void goDown(){
-        if( this.move() )
-            this.y += this.speed;
+        this.y += this.move();
         last = actual;
     }
     

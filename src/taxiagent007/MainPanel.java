@@ -18,8 +18,9 @@ import javax.swing.Timer;
  */
 public class MainPanel extends javax.swing.JFrame implements ActionListener {
     
-    static int total_minutes = 0;
-    static int minutes = 0;
+    static int total_seconds = 0;
+    static int seconds = 0;
+    static int frame = 20;
 
     /**
      * Creates new form MainPanel
@@ -72,6 +73,9 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
         calls_label = new javax.swing.JLabel();
         anim_slider = new javax.swing.JSlider();
         totalminutes_label = new javax.swing.JLabel();
+        animdelay_label = new javax.swing.JLabel();
+        frame_slider = new javax.swing.JSlider();
+        frame_label = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         console = new javax.swing.JTextArea();
@@ -131,7 +135,20 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
             }
         });
 
-        totalminutes_label.setText("0 minutes");
+        totalminutes_label.setText("0 second(s) in total");
+
+        animdelay_label.setText("Animation Delay: 150ms");
+
+        frame_slider.setMaximum(90);
+        frame_slider.setMinimum(1);
+        frame_slider.setValue(20);
+        frame_slider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                frame_sliderStateChanged(evt);
+            }
+        });
+
+        frame_label.setText("Frame: 20 seconds");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -148,7 +165,7 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
                         .addContainerGap()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                                .addComponent(time_label, javax.swing.GroupLayout.DEFAULT_SIZE, 114, Short.MAX_VALUE)
+                                .addComponent(time_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jButton1))
                             .addGroup(jPanel2Layout.createSequentialGroup()
@@ -157,12 +174,17 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
                                     .addComponent(poisson_label)
                                     .addComponent(calls_label))
                                 .addGap(0, 0, Short.MAX_VALUE))))
-                    .addComponent(anim_slider, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(anim_slider, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(animdelay_label)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(totalminutes_label))
+                            .addComponent(frame_slider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(frame_label))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(totalminutes_label)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -180,6 +202,12 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(totalminutes_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(frame_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(frame_slider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(animdelay_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(anim_slider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -196,7 +224,7 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
         console.setRows(5);
         jScrollPane1.setViewportView(console);
 
-        time_slider.setMaximum(1439);
+        time_slider.setMaximum(86399);
         time_slider.setValue(0);
         time_slider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -262,24 +290,22 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
 
     private void time_sliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_time_sliderStateChanged
         
-        if( MainPanel.minutes < this.time_slider.getValue() )
-            MainPanel.total_minutes += (this.time_slider.getValue() - MainPanel.minutes);
-        MainPanel.minutes = this.time_slider.getValue();
+        if( MainPanel.seconds < this.time_slider.getValue() )
+            MainPanel.total_seconds += (this.time_slider.getValue() - MainPanel.seconds);
+        
+        MainPanel.seconds = this.time_slider.getValue();
         
         //set lambda
-        if( MainPanel.minutes >= 7*60 && MainPanel.minutes <= 9*60 )
+        if( MainPanel.seconds >= 25200 && MainPanel.seconds <= 32400 )// 7am - 9am
             city.lambda = 3;
-        else if( MainPanel.minutes >= 17*60 && MainPanel.minutes <= 19*60 )
+        else if( MainPanel.seconds >= 61200 && MainPanel.seconds <= 68400 )// 5pm - 7pm
             city.lambda = 3;
-        else if( MainPanel.minutes > 9*60 && MainPanel.minutes <= 17*60 )
+        else if( MainPanel.seconds > 32400 && MainPanel.seconds <= 61200 )// 9am - 5pm
             city.lambda = 2;
-        else if( MainPanel.minutes > 19*60 && MainPanel.minutes <= 23*60 )
+        else if( MainPanel.seconds > 68400 && MainPanel.seconds <= 82800 ) //7pm - 11pm
             city.lambda = 2;
         else
             city.lambda = 1;
-        
-        this.lambda_label.setText( "λ = " + city.lambda);
-        this.poisson_label.setText( "p(" + city.k + ") = " + city.poisson(city.k ));
         
         this.updateLabels();
     }//GEN-LAST:event_time_sliderStateChanged
@@ -288,34 +314,47 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
         this.city_timer.setInitialDelay( this.anim_slider.getValue() );
         this.city_timer.setDelay( this.anim_slider.getValue() );
         this.city_timer.restart();
+        this.updateLabels();
     }//GEN-LAST:event_anim_sliderStateChanged
 
+    private void frame_sliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_frame_sliderStateChanged
+        MainPanel.frame = this.frame_slider.getValue();
+        this.updateLabels();
+    }//GEN-LAST:event_frame_sliderStateChanged
+
     private void updateLabels(){
+        
+        this.lambda_label.setText( "λ = " + this.city.lambda);
+        this.poisson_label.setText( "p(" + this.city.k + ") = " + city.poisson(this.city.k ));
+        
         //time label
-        int hour = (MainPanel.minutes/60)%12;
+        int hour = ((MainPanel.seconds/60)/60)%12;
         if( hour == 0 )
             hour = 12;
-        int minutes = MainPanel.minutes%60;
-        String xm = (MainPanel.minutes<60*12)?"A.M.":"P.M.";
+        int minutes = (MainPanel.seconds/60)%60;
+        int seconds = MainPanel.seconds%60;
+        String xm = (MainPanel.seconds<60*60*12)?"A.M.":"P.M.";
         
-        this.time_label.setText( hour + ":" + minutes + " " + xm );
+        this.time_label.setText( (hour<10?"0":"") + hour + ":" + (minutes<10?"0":"") + minutes + ":" + (seconds<10?"0":"") + seconds + " " + xm );
         
         //calls label
         this.calls_label.setText(city.totalCalls + " call(s)");
-        this.totalminutes_label.setText( MainPanel.total_minutes + " minutes");
+        this.totalminutes_label.setText( MainPanel.total_seconds + " second(s) in total");
+        this.animdelay_label.setText( "Animation delay: " + this.anim_slider.getValue() + "ms");
+        this.frame_label.setText( "Frame: " + MainPanel.frame + " seconds");
     }
     
     private void update(){
         if( this.running ){
             city.updateCity();
             
-            if( this.time_slider.getValue() >= this.time_slider.getMaximum() ){
+            if( MainPanel.seconds >= this.time_slider.getMaximum() ){
                 this.time_slider.setValue( 0 );
             }else{
-                this.time_slider.setValue( this.time_slider.getValue() + 1 );
+                this.time_slider.setValue( MainPanel.seconds + MainPanel.frame );
             }
             
-            if( this.time_slider.getValue()%60 == 0 ){
+            if( (MainPanel.seconds%(60*60)) == 0 ){
                 city.resolveAll();
             }
             
@@ -420,8 +459,11 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSlider anim_slider;
+    private javax.swing.JLabel animdelay_label;
     private javax.swing.JLabel calls_label;
     private javax.swing.JTextArea console;
+    private javax.swing.JLabel frame_label;
+    private javax.swing.JSlider frame_slider;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;

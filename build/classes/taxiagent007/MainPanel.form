@@ -84,7 +84,7 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" alignment="1" attributes="0">
-                                  <Component id="time_label" pref="114" max="32767" attributes="0"/>
+                                  <Component id="time_label" max="32767" attributes="0"/>
                                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Component id="jButton1" min="-2" max="-2" attributes="0"/>
                               </Group>
@@ -98,14 +98,21 @@
                               </Group>
                           </Group>
                       </Group>
-                      <Component id="anim_slider" alignment="0" pref="0" max="32767" attributes="0"/>
+                      <Component id="anim_slider" alignment="0" pref="210" max="32767" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="animdelay_label" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" attributes="0">
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="totalminutes_label" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <Component id="frame_slider" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="frame_label" alignment="0" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
-              </Group>
-              <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="totalminutes_label" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -126,6 +133,12 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="totalminutes_label" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
+                  <Component id="frame_label" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="frame_slider" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Component id="animdelay_label" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Component id="anim_slider" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -194,11 +207,31 @@
         </Component>
         <Component class="javax.swing.JLabel" name="totalminutes_label">
           <Properties>
-            <Property name="text" type="java.lang.String" value="0 minutes"/>
+            <Property name="text" type="java.lang.String" value="0 second(s) in total"/>
           </Properties>
           <AccessibilityProperties>
             <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="totalminutes_label"/>
           </AccessibilityProperties>
+        </Component>
+        <Component class="javax.swing.JLabel" name="animdelay_label">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Animation Delay: 150ms"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JSlider" name="frame_slider">
+          <Properties>
+            <Property name="maximum" type="int" value="90"/>
+            <Property name="minimum" type="int" value="1"/>
+            <Property name="value" type="int" value="20"/>
+          </Properties>
+          <Events>
+            <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="frame_sliderStateChanged"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JLabel" name="frame_label">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Frame: 20 seconds"/>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>
@@ -251,7 +284,7 @@
         </Container>
         <Component class="javax.swing.JSlider" name="time_slider">
           <Properties>
-            <Property name="maximum" type="int" value="1439"/>
+            <Property name="maximum" type="int" value="86399"/>
             <Property name="value" type="int" value="0"/>
           </Properties>
           <Events>

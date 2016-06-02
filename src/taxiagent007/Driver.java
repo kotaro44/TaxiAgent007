@@ -18,24 +18,6 @@ public class Driver extends Agent {
     public Taxi taxi;
     public City city;
     
-    public boolean drive(Direction dir,City city){
-        switch(dir){
-            case RIGHT:
-                    this.taxi.x += this.taxi.speed;
-                break;
-            case LEFT:
-                    this.taxi.x -= this.taxi.speed;
-                break;
-            case DOWN:
-                    this.taxi.y += this.taxi.speed;
-                break;
-            case UP:
-                    this.taxi.y -= this.taxi.speed;
-                break;
-        }
-        return true;
-    }
-    
     @Override
      protected void setup() {
         Object[] args = getArguments();
@@ -45,9 +27,14 @@ public class Driver extends Agent {
         
         Intersection dest = city.intersections[(int)args[2]];
         
-        Behaviour b = new DriveBehaviour( taxi , city , dest );
+        Behaviour b = new DriveBehaviour( taxi , city , dest ){
+            protected void onDone(){
+                System.out.println("DONE???");
+            }
+        };
         System.out.println(b);
         this.addBehaviour( b );
+        
     }
         
     @Override

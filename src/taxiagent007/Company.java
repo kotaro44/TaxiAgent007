@@ -10,7 +10,6 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import java.util.ArrayList;
-import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.awt.Color;
@@ -23,9 +22,9 @@ public class Company extends Agent {
     boolean ready = false;
     MainPanel mainpanel;
     ArrayList<Taxi> taxis = new ArrayList<>();
-    Object[][] taxi_props = {{1,1,Color.ORANGE,"TaxiDriver1"}};//,
-                             //{15,50,Color.BLACK,"TaxiDriver2"},
-                             //{100,1,Color.WHITE,"TaxiDriver3"}};
+    Object[][] taxi_props = {{1,1,Color.ORANGE,"TaxiDriver1"},
+                             {15,50,Color.BLACK,"TaxiDriver2"},
+                             {100,1,Color.WHITE,"TaxiDriver3"}};
     
     public void onPanelReady(MainPanel mainpanel){
         this.mainpanel = mainpanel;

@@ -12,9 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
-import java.util.PriorityQueue;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 
 /**
@@ -36,6 +34,13 @@ public class City extends JPanel {
     Graph graph;
     
     public int totalCalls = 0;
+    
+    public Intersection[] intersections;
+    
+    
+    //behaviour variables
+    int lambda = 1;
+    int k = 9;
 
     
     private int[] taxi_center = {56,28};
@@ -110,13 +115,6 @@ public class City extends JPanel {
         {50,29,40,20,21}//41
     };
     
-    public Intersection[] intersections;
-    
-    
-    //behaviour variables
-    int lambda = 1;
-    int k = 5;
-    
     public City(){
         try {
             File pathToFile = new File("road.jpg");
@@ -129,6 +127,8 @@ public class City extends JPanel {
         
         this.h = (this.height - this.margin_y*2)*2;
         this.w = this.width - this.margin_x*2;
+        
+    
        
     }
     
