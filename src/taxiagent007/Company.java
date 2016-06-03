@@ -28,9 +28,13 @@ public class Company extends Agent {
     MainPanel mainpanel;
     ArrayList<Taxi> taxis = new ArrayList<>();
     ArrayList<Passenger> passengers;
-    Object[][] taxi_props = {{1,1,Color.ORANGE,"TaxiDriver1"}};/*,
-                             {15,50,Color.BLACK,"TaxiDriver2"},
-                             {100,1,Color.WHITE,"TaxiDriver3"}};*/
+    public int askingTo = 1;
+    public String driverName = "TaxiDriver";
+    public Object[][] taxi_props = {{1,1,Color.ORANGE},
+                             {15,50,Color.BLACK},
+                             {1,50,Color.PINK},
+                             {100,50,Color.GREEN},
+                             {100,1,Color.WHITE}};
 
   
     public void onPanelReady(MainPanel mainpanel){
@@ -39,19 +43,18 @@ public class Company extends Agent {
         this.passengers = new ArrayList<>();
         hireTaxiAgents();
         this.addBehaviour(new AssignPassengerBehaviour(this));
-      
-        
     }
     
     public void hireTaxiAgents(){
         ContainerController cc = getContainerController();
         try {
+            int i = 1;
             for( Object[] props : this.taxi_props ){
                 Object[] taxi = new Object[3];
                 taxi[0] = new Taxi( (int) props[0] ,(int) props[1], (Color) props[2] );
                 taxi[1] = this.mainpanel.city;
-                taxi[2] = (int)Math.floor( this.mainpanel.city.intersections.length*Math.random() );
-                AgentController new_agent = cc.createNewAgent((String)props[3], "taxiagent007.Driver", taxi );
+                taxi[2] = i;
+                AgentController new_agent = cc.createNewAgent(driverName + i++, "taxiagent007.Driver", taxi );
 
                 new_agent.start();
                 
@@ -71,7 +74,7 @@ public class Company extends Agent {
     }
     
     public void callTaxi( Passenger passenger ){
-        System.out.println("Received a call from: " + passenger );
+        System.out.println("Company: Received a call from: " + passenger );
         passengers.add(passenger);
     }
     

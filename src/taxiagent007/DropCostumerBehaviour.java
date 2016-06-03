@@ -24,7 +24,7 @@ public class DropCostumerBehaviour extends Behaviour {
     @Override
     public void action() {
         if( !droped ){
-            System.out.println("Droped costumer!");
+            System.out.println("Driver " + driver.index + ": Droped costumer!");
             droped = true;
             Intersection actual = driver.city.getNearestIntersection( driver.taxi.x , driver.taxi.y );
             actual.dropPassenger(driver.taxi.passenger);

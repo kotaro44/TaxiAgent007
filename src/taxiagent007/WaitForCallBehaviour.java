@@ -28,12 +28,12 @@ public class WaitForCallBehaviour extends Behaviour {
     public void action() {
         ACLMessage msg = this.myAgent.receive();
         if (msg != null && !received ) {
-            
-            System.out.println("Received Message!");
+           
             String passenger = msg.getContent();
-            System.out.println("They asked me to go to: " + passenger);
-            //ACLMessage reply = msg.createReply();
-            
+            System.out.println("Driver " + driver.index +  ": They asked me to go to: " + passenger);
+            ACLMessage reply = msg.createReply();
+            reply.setContent("Yes");
+            this.driver.send(reply);
             
             Pattern p = Pattern.compile("\\{\\d+\\,\\d+\\}");
             Matcher m = p.matcher(passenger);
@@ -44,6 +44,9 @@ public class WaitForCallBehaviour extends Behaviour {
             m.find();
             Intersection destination = driver.city.getNearestIntersection(m.group());
             
+            
+            RejectCallBehaviour b = new RejectCallBehaviour( driver );
+            driver.addBehaviour( b );
             driver.addBehaviour(new GoToLocationBehaviour( origin , driver ){
                 @Override
                 public int onEnd(){
@@ -56,6 +59,7 @@ public class WaitForCallBehaviour extends Behaviour {
                                     driver.addBehaviour(new DropCostumerBehaviour( driver ){
                                         @Override
                                         public int onEnd(){
+                                            driver.removeBehaviour(b);
                                             driver.addBehaviour(new WaitForCallBehaviour( driver ) );
                                             return 0;
                                         }
@@ -69,7 +73,7 @@ public class WaitForCallBehaviour extends Behaviour {
                     return 0;
                 }
             });
-           
+            
             received = true;
         }
     }

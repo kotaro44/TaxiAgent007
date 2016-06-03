@@ -261,12 +261,6 @@ public class City extends JPanel {
     }
     
     public void updateCity(){
-       /*for (Taxi taxi : this.taxis) {
-           while( !taxi.drive(Direction.values()[(int) Math.floor( Math.random()*4 )] , this ) ){
-               
-           }
-       } */
-     
         int actual = MainPanel.seconds;
         int elapsed = actual - last ;
         if( elapsed >= 0 )

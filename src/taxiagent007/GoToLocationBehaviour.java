@@ -21,7 +21,7 @@ public class GoToLocationBehaviour extends Behaviour {
     public int actual;
     
     public GoToLocationBehaviour(Intersection dest , Driver driver ){
-        System.out.println("going to: " + dest );
+        System.out.println("Driver " + driver.index + ": going to " + dest );
         this.driver = driver;
         this.origin = this.driver.city.getNearestIntersection( this.driver.taxi.x , this.driver.taxi.y );
         this.dest = dest;
@@ -78,7 +78,7 @@ public class GoToLocationBehaviour extends Behaviour {
     @Override
     public boolean done() {
         if( this.dest.x == this.driver.taxi.x && this.dest.y == this.driver.taxi.y ){
-            System.out.println("Arrived at " + this.driver.taxi );
+            System.out.println("Driver " + driver.index + ": Arrived at " + this.driver.taxi );
             return true;
         }
         return false;

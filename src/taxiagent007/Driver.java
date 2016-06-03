@@ -10,12 +10,13 @@ import jade.core.behaviours.Behaviour;
 
 /**
  *
- * @author kotaro
+ * @author kotaro and Fabio :)
  */
 public class Driver extends Agent {
  
     public Taxi taxi;
     public City city;
+    public int index;
     
     public Taxi getTaxi(){
         return this.taxi;
@@ -32,7 +33,6 @@ public class Driver extends Agent {
             @Override
             public int onEnd(){
                 self.AddBehaviour();
-                System.out.println("Hello");
                 return 0;
             }
         };
@@ -44,13 +44,13 @@ public class Driver extends Agent {
         Object[] args = getArguments();
         this.taxi = (Taxi)args[0];
         this.city = (City)args[1];
+        this.index = (Integer)args[2];
         System.out.println("Driver is ready!");
         //this.AddBehaviour();
  
         this.addBehaviour(new WaitForCallBehaviour(this){
             @Override
             public int onEnd(){
-                System.out.println("STOP WAITING!");
                 return 0;
             }
         });   

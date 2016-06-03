@@ -24,7 +24,7 @@ public class PickCostumerBehaviour extends Behaviour {
     @Override
     public void action() {
         if( !picked ){
-            System.out.println("Picked costumer!");
+            System.out.println("Driver " + driver.index + ": Picked costumer!");
             picked = true;
             Intersection actual = driver.city.getNearestIntersection( driver.taxi.x , driver.taxi.y );
             driver.taxi.passenger = actual.pickPassenger();
