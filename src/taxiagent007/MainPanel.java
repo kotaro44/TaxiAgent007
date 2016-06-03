@@ -354,9 +354,9 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
                 this.time_slider.setValue( MainPanel.seconds + MainPanel.frame );
             }
             
-            if( (MainPanel.seconds%(60*60)) == 0 ){
+            /*if( (MainPanel.seconds%(60*60)) == 0 ){
                 city.resolveAll();
-            }
+            }*/
             
             this.updateLabels();
         }

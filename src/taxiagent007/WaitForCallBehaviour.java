@@ -17,21 +17,60 @@ import java.util.regex.Pattern;
 public class WaitForCallBehaviour extends Behaviour {
 
     boolean received = false;
+    public Driver driver;
+    
+    public WaitForCallBehaviour(Driver driver){
+        this.driver = driver;
+    }
+   
     
     @Override
     public void action() {
         ACLMessage msg = this.myAgent.receive();
-        if (msg != null) {
+        if (msg != null && !received ) {
+            
             System.out.println("Received Message!");
             String passenger = msg.getContent();
             System.out.println("They asked me to go to: " + passenger);
             //ACLMessage reply = msg.createReply();
             
             
-            /***FABIO: read where the company wants this taxi to go from passenger variable*****/
-            /*Pattern p = Pattern.compile("{\\d+,\\d+}");
-            Matcher m = p.matcher("aaaaab");
-            boolean b = m.matches();*/
+            Pattern p = Pattern.compile("\\{\\d+\\,\\d+\\}");
+            Matcher m = p.matcher(passenger);
+            
+            m.find();
+            Intersection origin = driver.city.getNearestIntersection(m.group());
+            
+            m.find();
+            Intersection destination = driver.city.getNearestIntersection(m.group());
+            
+            driver.addBehaviour(new GoToLocationBehaviour( origin , driver ){
+                @Override
+                public int onEnd(){
+                    driver.addBehaviour(new PickCostumerBehaviour( driver ){
+                        @Override
+                        public int onEnd(){
+                            driver.addBehaviour(new GoToLocationBehaviour( destination , driver ){
+                                @Override
+                                public int onEnd(){
+                                    driver.addBehaviour(new DropCostumerBehaviour( driver ){
+                                        @Override
+                                        public int onEnd(){
+                                            driver.addBehaviour(new WaitForCallBehaviour( driver ) );
+                                            return 0;
+                                        }
+                                    });
+                                    return 0;
+                                }
+                            });
+                            return 0;
+                        }
+                    } );
+                    return 0;
+                }
+            });
+           
+            received = true;
         }
     }
 

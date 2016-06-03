@@ -5,6 +5,8 @@
  */
 package taxiagent007;
 
+import java.util.ArrayList;
+
 
 /**
  *
@@ -15,17 +17,29 @@ public class Intersection {
     public int y;
     public Passenger passenger;
     public int calls = 0;
+    public ArrayList<Passenger> drops;
     public int index;
     
     public Intersection( int x , int y , int index ){
         this.x = x;
         this.y = y;
         this.index = index;
+        this.drops = new ArrayList<>();
     }
     
     public void receiveCall(Passenger new_passenger) {
         this.calls++;
         this.passenger = new_passenger;
+    }
+    
+    public void dropPassenger(Passenger passenger){
+        this.drops.add(passenger);
+    }
+    
+    public Passenger pickPassenger(){
+        Passenger result = this.passenger;
+        this.passenger = null;
+        return result;
     }
     
     public double distance( Intersection other ){

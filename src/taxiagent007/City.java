@@ -14,6 +14,8 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -35,8 +37,10 @@ public class City extends JPanel {
     
     public int totalCalls = 0;
     
-    public Intersection[] intersections;
+    public Intersection[] intersections; //ver aqui
     
+    int last = 0;
+    int total = 0;
     
     //behaviour variables
     int lambda = 1;
@@ -218,6 +222,10 @@ public class City extends JPanel {
             }
             
             g.fillOval(scaleX(intersection.x) - r/2,scaleY(intersection.y) - r/2, r, r);
+            
+            r = 1*intersection.drops.size();
+            g.setColor(Color.white);
+            g.fillOval(scaleX(intersection.x) - r/2,scaleY(intersection.y) - r/2, r, r);
         }
         
         //draw Taxi Center
@@ -259,15 +267,24 @@ public class City extends JPanel {
            }
        } */
      
-       for( Intersection intersection : this.intersections ){
-           if( Math.random() < this.poisson(this.k) ){
-               Passenger new_passenger = new Passenger( intersection , this.intersections );
-               this.passengers.add(new_passenger);
-               intersection.receiveCall( new_passenger );
-               this.company.callTaxi(new_passenger);
-               this.totalCalls++;
-           }
-       }
+        int actual = MainPanel.seconds;
+        int elapsed = actual - last ;
+        if( elapsed >= 0 )
+            total += elapsed;
+       
+        if( total >= 60*10 ){
+            total = 0;
+            for( Intersection intersection : this.intersections ){
+                if( intersection.passenger == null && Math.random() < this.poisson(this.k) ){
+                    Passenger new_passenger = new Passenger( intersection , this.intersections );
+                    this.passengers.add(new_passenger);
+                    intersection.receiveCall( new_passenger );
+                    this.company.callTaxi(new_passenger);
+                    this.totalCalls++;
+                }
+            }
+        }
+        last = actual;
        
     }
 
@@ -275,6 +292,16 @@ public class City extends JPanel {
         for( Intersection intersection : this.intersections ){
             intersection.passenger = null;
         }
+    }
+    
+    public LinkedList<Intersection> getShortestPath( Intersection from, Intersection to){
+        dijkstra.execute(from);
+        return dijkstra.getPath(to);
+    }
+    
+    public Intersection[] getIntersections() //just in case we need a copy of intersections[]
+    {
+        return intersections.clone();
     }
 
     public Intersection getNearestIntersection(double x, double y) {
@@ -287,8 +314,16 @@ public class City extends JPanel {
         return nearest;
     }
     
-    public LinkedList<Intersection> getShortestPath( Intersection from, Intersection to){
-        dijkstra.execute(from);
-        return dijkstra.getPath(to);
+    public Intersection getNearestIntersection(String coordinate) {
+        Pattern p = Pattern.compile("\\d+");
+        Matcher m = p.matcher(coordinate);
+        int[] coord = {0,0};
+        m.find();
+        coord[0] = Integer.parseInt(m.group());
+        m.find();
+        coord[1] = Integer.parseInt(m.group());
+        Intersection result = this.getNearestIntersection(coord[0], coord[1]);
+        return result;
+        
     }
 }
