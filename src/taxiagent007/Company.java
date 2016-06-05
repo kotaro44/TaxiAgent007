@@ -34,15 +34,14 @@ public class Company extends Agent {
     public String driverName = "TaxiDriver";
     public int profit = 0;
     public Object[][] taxi_props = {{57,29,Color.ORANGE},
-                             {57,29,Color.CYAN}};/*,
+                             {57,29,Color.CYAN},
                              {57,29,Color.PINK},
-                             {57,29,Color.GREEN},
+                             {57,29,Color.GREEN}};/*,
                              {57,29,Color.BLACK}};*/
     
     public double charge_rate_km = 40.0/7.0;
     public double gas_cost_km = 6.0/7.0;
 
-  
     public void onPanelReady(MainPanel mainpanel){
         this.mainpanel = mainpanel;
         this.mainpanel.city.setCompany(this);
@@ -82,7 +81,7 @@ public class Company extends Agent {
     }
     
     public void callTaxi( Passenger passenger ){
-        System.out.println("Company: Received a call from: " + passenger );
+        System.out.println("Company: Received a call from P" + passenger.id + ": " + passenger );
         passengers.add(passenger);
     }
     

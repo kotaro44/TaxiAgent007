@@ -7,8 +7,7 @@ package taxiagent007;
 
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 /**
  *
@@ -24,13 +23,15 @@ public class BidBehaviour extends Behaviour {
     public double myBid = 1;
     public double maxPayOff;
     
-    public BidBehaviour( Intersection origin, Intersection destiny , Driver driver , ACLMessage msg ){
+    public int passenger_id;
+    
+    public BidBehaviour( Intersection origin, Intersection destiny , Driver driver , ACLMessage msg , int passenger_id ){
         this.origin = origin;
         this.destiny = destiny;
         this.driver = driver;
         this.msg = msg;
-        
         this.driver.state = State.BIDDING_FOR_PASSENGER;
+        this.passenger_id = passenger_id;
     }
 
     @Override
@@ -41,12 +42,14 @@ public class BidBehaviour extends Behaviour {
                     double total_dist =  this.origin.distance( this.driver.taxi.x , this.driver.taxi.y ) + chargeable_dist;
                     
                     this.maxPayOff = chargeable_dist*this.driver.city.company.charge_rate_km - total_dist*this.driver.city.company.gas_cost_km;
+                    this.driver.last_profit = this.maxPayOff;
                     
                     ACLMessage reply = this.msg.createReply();
-                    if( myBid >= maxPayOff ){
+                    if( myBid >= maxPayOff-1 || maxPayOff < 0 ){
                         reply.setContent(this.driver.index + ":0");
                     }else{
                         reply.setContent(this.driver.index + ":" + this.myBid );
+                        this.driver.last_max_bid = this.myBid;
                     }
                     
                     this.driver.send(reply);
@@ -57,43 +60,11 @@ public class BidBehaviour extends Behaviour {
                 if ( new_msg != null  ) {
                     this.msg = new_msg;
                     String company_decision = this.msg.getContent();
-                    
+        
                     if( company_decision.compareTo("GO") == 0 ){
-                        RejectCallBehaviour b = new RejectCallBehaviour( driver );
-                        driver.addBehaviour( b );
-                        
-                        this.driver.state = State.GOING_FOR_PASSENGER;
-                        this.driver.addBehaviour(new GoToLocationBehaviour( origin , driver ){
-                            @Override
-                            public int onEnd(){
-                                this.driver.state = State.PICKING_PASSENGER;
-                                driver.addBehaviour(new PickCostumerBehaviour( driver ){
-                                    @Override
-                                    public int onEnd(){
-                                        this.driver.state = State.TAKING_PASSENGER;
-                                        driver.addBehaviour(new GoToLocationBehaviour( destiny , driver ){
-                                            @Override
-                                            public int onEnd(){
-                                                this.driver.state = State.DROPING_PASSENGER;
-                                                driver.addBehaviour(new DropCostumerBehaviour( driver ){
-                                                    @Override
-                                                    public int onEnd(){
-                                                        this.driver.state = State.WAITING_FOR_COMPANY;
-                                                        driver.removeBehaviour(b);
-                                                        driver.addBehaviour(new WaitForCallBehaviour( driver ) );
-                                                        return 0;
-                                                    }
-                                                });
-                                                return 0;
-                                            }
-                                        });
-                                        return 0;
-                                    }
-                                } );
-                                return 0;
-                            }
-                        });
-                        
+                        this.driver.state = State.WON_BID_RESTING;
+                        this.driver.requests.add( new Request( origin , destiny , this.maxPayOff , this.myBid , this.passenger_id ) );
+                        this.driver.removeBehaviour(this);
                     } else if( company_decision.compareTo("Sorry") == 0 ){
                         this.driver.state = State.WAITING_FOR_COMPANY;
                         this.driver.removeBehaviour(this);

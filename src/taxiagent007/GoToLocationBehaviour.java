@@ -27,7 +27,12 @@ public class GoToLocationBehaviour extends Behaviour {
         this.path = this.driver.city.getShortestPath( this.origin , this.dest );
         this.actual = 0;
         
-        System.out.println("Driver " + driver.index + ": going to " + dest + " from " + this.path.get(actual) + " with a distance of " + this.driver.city.getTotalDistance(this.path) );
+        String console = "Driver " + driver.index ;
+        console += ": going to " + dest + " from ";
+        console += this.path.get(actual) + " with a distance of ";
+        console += this.driver.city.getTotalDistance(this.path);
+        
+        System.out.println( console );
     }
 
     @Override

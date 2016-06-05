@@ -27,10 +27,9 @@ public class DropCostumerBehaviour extends Behaviour {
             System.out.println("Driver " + driver.index + ": Droped costumer!");
             droped = true;
             Intersection actual = driver.city.getNearestIntersection( driver.taxi.x , driver.taxi.y );
+            driver.city.company.profit += this.driver.actual_request.company_cut;
+            driver.profit += (this.driver.actual_request.price-this.driver.actual_request.company_cut);
             actual.dropPassenger(driver.taxi.passenger);
-            driver.taxi.passenger = null;
-            driver.profit++;
-            driver.city.company.profit++;
         }
     }
 

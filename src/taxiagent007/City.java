@@ -207,12 +207,19 @@ public class City extends JPanel {
             
             r = 1*intersection.calls;
             g.setColor(Color.red);
+            
+            //draw Passenger
+            
+          
             if( intersection.passenger != null ){
+                
                 g.drawLine(scaleX(intersection.x), scaleY(intersection.y), 
                     scaleX(intersection.passenger.destination.x), scaleY(intersection.passenger.destination.y));
     
                 g.fillOval(this.scaleX(intersection.passenger.destination.x) - r/2, 
                     scaleY(intersection.passenger.destination.y) - r/2, r, r);
+                
+                g.drawString("P" + intersection.passenger.id, scaleX(intersection.x) + 5, scaleY(intersection.y) + 5 );  
                 
                 g.setColor(Color.yellow);
             }else{
@@ -235,6 +242,12 @@ public class City extends JPanel {
         for ( int i = 0 ; i < this.company.taxis.size() ; i++ ) {
             Taxi taxi = this.company.taxis.get(i);
             if( taxi != null ){
+                if( taxi.passenger != null ){
+                    g.setColor(Color.red);
+                    tr += 5;
+                    g.fillOval( scaleX(taxi.x) - tr/2, scaleY(taxi.y)- tr/2, tr, tr);
+                    tr -= 5;
+                }
                 g.setColor(taxi.color);
                 g.fillOval( scaleX(taxi.x) - tr/2, scaleY(taxi.y)- tr/2, tr, tr);
             }
@@ -258,22 +271,31 @@ public class City extends JPanel {
         return (int)(this.margin_y + this.h*y/100);
     }
     
+    public boolean isThereAnyAvailableIntersection(){
+        for( Intersection intersection : this.intersections ){
+            if( intersection.passenger == null )
+                return true;
+        }
+        return false;
+    }
+    
     public void updateCity(){
         int actual = MainPanel.seconds;
         int elapsed = actual - last ;
         if( elapsed >= 0 )
             total += elapsed;
        
-        if( total >= 60*10 ){
+        if( total >= 60 ){
             total = 0;
-            for( Intersection intersection : this.intersections ){
-                if( intersection.passenger == null && Math.random() < this.poisson(this.k) ){
-                    Passenger new_passenger = new Passenger( intersection , this.intersections );
-                    this.passengers.add(new_passenger);
-                    intersection.receiveCall( new_passenger );
-                    this.company.callTaxi(new_passenger);
-                    this.totalCalls++;
-                }
+            if( isThereAnyAvailableIntersection() && Math.random() < this.poisson(this.k) ){
+                Intersection intersection;
+                do{ 
+                    intersection = this.intersections[ (int)Math.floor(Math.random()*this.intersections.length) ];
+                }while( intersection.passenger != null );
+                Passenger new_passenger = new Passenger( intersection , this.intersections , this.totalCalls++ );
+                this.passengers.add(new_passenger);
+                intersection.receiveCall( new_passenger );
+                this.company.callTaxi(new_passenger);
             }
         }
         last = actual;
@@ -288,8 +310,19 @@ public class City extends JPanel {
     
     //This function throws errors of concurrent modification
     public LinkedList<Intersection> getShortestPath( Intersection from, Intersection to){
-        dijkstra.execute(from);
-        return dijkstra.getPath(to);
+        LinkedList<Intersection> result;
+        if( from == to ){
+            result = new LinkedList<>();
+            result.add(to);
+        }else{
+            dijkstra.execute(from);
+            result = dijkstra.getPath(to);
+        }
+        if( result == null ){
+            System.out.println(">>>>>>>>>>>>" + from + " -> " + to + "  gives null?");
+        }
+        
+        return result;
     }
     
     public double getTotalDistance(LinkedList<Intersection> path){

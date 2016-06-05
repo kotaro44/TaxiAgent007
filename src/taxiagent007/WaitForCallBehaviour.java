@@ -24,7 +24,6 @@ public class WaitForCallBehaviour extends Behaviour {
         this.driver.state = State.WAITING_FOR_COMPANY;
     }
    
-    
     @Override
     public void action() {
         switch(this.driver.state){
@@ -44,69 +43,23 @@ public class WaitForCallBehaviour extends Behaviour {
                     m.find();
                     Intersection destination = driver.city.getNearestIntersection(m.group());
                     
-                    driver.addBehaviour(new BidBehaviour( origin ,destination , this.driver , msg ));
+                    p = Pattern.compile("P\\d+");
+                    m = p.matcher(passenger);
+                    
+                    m.find();
+                    String pid = m.group();
+                    int passenger_id = Integer.parseInt( pid.substring(1, pid.length()) );
+                    
+                    driver.addBehaviour(new BidBehaviour( origin ,destination , this.driver , msg  , passenger_id ));
                 }
                 break;
+            case WON_BID_RESTING:
+                    this.driver.actual_request = this.driver.requests.remove(0);
+                    this.driver.state = State.GOING_FOR_PASSENGER;
+                    driver.addBehaviour(new ProcessRequestBehaviour( this.driver , this.driver.actual_request ));
+                break;
         }
-        
-        
-        
-        /*ACLMessage msg = this.myAgent.receive();
-        if (msg != null && !received ) {
-           
-            String passenger = msg.getContent();
-            System.out.println("Driver " + driver.index +  ": They asked me to go to: " + passenger);
-            ACLMessage reply = msg.createReply();
-            reply.setContent("Yes");
-            this.driver.send(reply);
-            
-            Pattern p = Pattern.compile("\\{\\d+\\,\\d+\\}");
-            Matcher m = p.matcher(passenger);
-            
-            m.find();
-            Intersection origin = driver.city.getNearestIntersection(m.group());
-            
-            m.find();
-            Intersection destination = driver.city.getNearestIntersection(m.group());
-            
-            
-            RejectCallBehaviour b = new RejectCallBehaviour( driver );
-            driver.addBehaviour( b );
-            
-            this.driver.state = State.GOING_FOR_PASSENGER;
-            driver.addBehaviour(new GoToLocationBehaviour( origin , driver ){
-                @Override
-                public int onEnd(){
-                    this.driver.state = State.PICKING_PASSENGER;
-                    driver.addBehaviour(new PickCostumerBehaviour( driver ){
-                        @Override
-                        public int onEnd(){
-                            this.driver.state = State.TAKING_PASSENGER;
-                            driver.addBehaviour(new GoToLocationBehaviour( destination , driver ){
-                                @Override
-                                public int onEnd(){
-                                    this.driver.state = State.DROPING_PASSENGER;
-                                    driver.addBehaviour(new DropCostumerBehaviour( driver ){
-                                        @Override
-                                        public int onEnd(){
-                                            this.driver.state = State.WAITING_FOR_COMPANY;
-                                            driver.removeBehaviour(b);
-                                            driver.addBehaviour(new WaitForCallBehaviour( driver ) );
-                                            return 0;
-                                        }
-                                    });
-                                    return 0;
-                                }
-                            });
-                            return 0;
-                        }
-                    } );
-                    return 0;
-                }
-            });
-            
-            received = true;
-        }*/
+
     }
 
     @Override

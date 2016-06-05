@@ -57,23 +57,30 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
     }
     
     public void setTaxiLabels(){
-        taxi_labels = new javax.swing.JLabel[this.city.company.taxi_props.length][3];
+        taxi_labels = new javax.swing.JLabel[this.city.company.taxi_props.length][7];
         for( int i = 0 ; i < taxi_labels.length; i++ ){
             taxi_labels[i][0] = new javax.swing.JLabel();
             taxi_labels[i][1] = new javax.swing.JLabel();
             taxi_labels[i][2] = new javax.swing.JLabel();
+            taxi_labels[i][3] = new javax.swing.JLabel();
+            taxi_labels[i][4] = new javax.swing.JLabel();
+            taxi_labels[i][5] = new javax.swing.JLabel();
+            taxi_labels[i][6] = new javax.swing.JLabel();
             
             taxi_labels[i][0].setFont(new java.awt.Font("Tahoma", 1, 11));
             taxi_labels[i][0].setText("Taxi driver " + (i+1));
             taxi_labels[i][0].setForeground( (Color)this.city.company.taxi_props[i][2] );
             taxi_labels[i][1].setText(State.WAITING_FOR_COMPANY.name());
             taxi_labels[i][2].setText("Profit: NT$0");
-
+            taxi_labels[i][4].setText("Bid: NT$0");
+            taxi_labels[i][3].setText("Customer: ");
+            taxi_labels[i][5].setText("Bid: ");
+            taxi_labels[i][6].setText("Max Prof: ");
         }
         
-       
         javax.swing.GroupLayout taxi_state_panelLayout = new javax.swing.GroupLayout(taxi_state_panel);
         taxi_state_panel.setLayout(taxi_state_panelLayout);
+     
         
         GroupLayout.SequentialGroup seq_group = taxi_state_panelLayout.createSequentialGroup()
                 .addContainerGap();
@@ -217,12 +224,12 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(frame_slider, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(anim_slider, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
+                    .addComponent(anim_slider, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(animdelay_label)
                             .addComponent(frame_label))
-                        .addGap(0, 109, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(taxi_state_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
             .addGroup(jPanel2Layout.createSequentialGroup()
@@ -420,8 +427,23 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
         
         //taxi labels
         for( int i = 0 ; i < this.taxi_labels.length ; i++ ){
-            taxi_labels[i][2].setText("Profit: NT$" + this.company.taxis.get(i).driver.profit );
-            taxi_labels[i][1].setText( this.company.taxis.get(i).driver.state.name() );
+            String requests = "";
+            String customer = "";
+            Taxi taxi = this.company.taxis.get(i);
+            for( int j = 0 ; j < taxi.driver.requests.size() ; j++ )
+                requests +=  "P" + taxi.driver.requests.get(j).passenger_id + ((j!=taxi.driver.requests.size()-1)?", ":"");
+            
+            if( taxi.driver.actual_request != null){
+                customer = "P" + taxi.driver.actual_request.passenger_id + "( NTD$" + ((int)taxi.driver.actual_request.price) +
+                        ", NTD$" + ((int)taxi.driver.actual_request.company_cut)  + ")" ;
+            }
+            
+            taxi_labels[i][6].setText("Max Prof: NT$" + ((int)taxi.driver.last_profit) );
+            taxi_labels[i][5].setText("Bid: NT$" + ((int)taxi.driver.last_max_bid) );
+            taxi_labels[i][4].setText("Customer:" + customer );
+            taxi_labels[i][3].setText("Next:" + requests );
+            taxi_labels[i][2].setText("Profit: NT$" + taxi.driver.profit );
+            taxi_labels[i][1].setText( taxi.driver.state.name() );
         }
         
         //company labels
@@ -450,6 +472,7 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
     
     private void startAnimation(){
        this.running = true;
+        System.out.println( this.city.getShortestPath( this.city.intersections[3], this.city.intersections[2]) );
     }
     
     private void stopAnimation(){

@@ -11,12 +11,14 @@ package taxiagent007;
  */
 public class Passenger {
     
+    public int id;
     public Intersection destination;
     public Intersection origin;
 
-    public Passenger(Intersection origin, Intersection[] intersections ){
+    public Passenger(Intersection origin, Intersection[] intersections , int id ){
         this.origin = origin;
         this.destination = origin;
+        this.id = id;
         
         int dest = 0;
         while( this.destination == this.origin ){
@@ -41,6 +43,6 @@ public class Passenger {
     
     @Override
     public String toString(){
-        return "Passenger in " + this.origin + " wants to go to " + this.destination;
+        return "P" + this.id + " in " + this.origin + " wants to go to " + this.destination;
     }
 }

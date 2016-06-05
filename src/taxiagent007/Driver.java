@@ -7,6 +7,7 @@ package taxiagent007;
 
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
+import java.util.ArrayList;
 
 /**
  *
@@ -19,6 +20,10 @@ public class Driver extends Agent {
     public int index;
     public int profit;
     public State state;
+    public ArrayList<Request> requests;
+    public Request actual_request;
+    public double last_max_bid = 0;
+    public double last_profit = 0;
     
     public Taxi getTaxi(){
         return this.taxi;
@@ -48,9 +53,9 @@ public class Driver extends Agent {
         this.city = (City)args[1];
         this.index = (Integer)args[2];
         this.taxi.driver = this;
+        this.requests = new ArrayList<>();
         System.out.println("Driver" + index + " is ready!");
-        //this.AddBehaviour();
- 
+
         this.addBehaviour(new WaitForCallBehaviour(this){
             @Override
             public int onEnd(){

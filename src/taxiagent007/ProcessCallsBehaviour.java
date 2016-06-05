@@ -34,6 +34,7 @@ public class ProcessCallsBehaviour extends Behaviour {
     
     public void processPassenger(){
         this.company.state = State.WAITING_FOR_BIDS;
+        System.out.println("Company: Bididng Passenger " + this.attendee.id + "!!" );
         
         //send message to all Taxis'
         for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
@@ -96,7 +97,7 @@ public class ProcessCallsBehaviour extends Behaviour {
                         
                         this.maxBidder = this.getMaxBidder();
                         if( this.noMoreBids() ){
-                            System.out.println("should we give the request to: " + this.maxBidder );
+                            System.out.println("should we give the request to: " + (this.maxBidder+1) );
                             
                             //notify the rest of bidders
                             for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
@@ -119,7 +120,7 @@ public class ProcessCallsBehaviour extends Behaviour {
                             
                         }else{
                             
-                            System.out.println("Max bidder until now: " + this.maxBidder );
+                            System.out.println("Max bidder until now: " + (this.maxBidder+1) );
                             int amount = Integer.parseInt(this.answers[this.maxBidder]);
                             
                             //notify the rest of bidders
@@ -154,30 +155,6 @@ public class ProcessCallsBehaviour extends Behaviour {
                 break;
                 
         }
-       
-        
-        
-        /*if( waiting_response ){
-            ACLMessage msg = this.myAgent.receive();
-            if ( msg != null ){
-                waiting_response = false;
-                if( msg.getContent().compareTo("Yes") == 0 ){
-                    this.attendee = null;
-                }else{
-                    if( ++company.askingTo > company.taxi_props.length )
-                        company.askingTo = 1;
-                }
-            }
-        }else{
-            if( this.attendee != null ){
-                this.processPassenger();
-            }else if( this.company.passengers.size() > 0  ){
-                this.attendee = this.company.passengers.remove(0);
-                this.processPassenger();
-            } else {
-                this.company.state = State.WAITING_FOR_CALLS;
-            }
-        }*/
     }
 
     @Override

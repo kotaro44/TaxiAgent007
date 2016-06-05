@@ -75,13 +75,13 @@
               <Group type="102" alignment="1" attributes="0">
                   <Group type="103" groupAlignment="1" attributes="0">
                       <Component id="frame_slider" alignment="0" max="32767" attributes="0"/>
-                      <Component id="anim_slider" alignment="0" pref="224" max="32767" attributes="0"/>
+                      <Component id="anim_slider" alignment="0" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="animdelay_label" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="frame_label" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace min="0" pref="109" max="32767" attributes="0"/>
+                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
                       <Component id="taxi_state_panel" alignment="1" max="32767" attributes="0"/>
                   </Group>
