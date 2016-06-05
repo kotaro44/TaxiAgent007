@@ -26,7 +26,7 @@ public class RejectCallBehaviour extends Behaviour {
         if( msg != null ){
             String passenger = msg.getContent();
             ACLMessage reply = msg.createReply();
-            reply.setContent("No");
+            reply.setContent(this.driver.index + ":0");
             this.driver.send(reply);
         }
     }

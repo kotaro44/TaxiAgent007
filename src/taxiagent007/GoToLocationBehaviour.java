@@ -21,12 +21,13 @@ public class GoToLocationBehaviour extends Behaviour {
     public int actual;
     
     public GoToLocationBehaviour(Intersection dest , Driver driver ){
-        System.out.println("Driver " + driver.index + ": going to " + dest );
         this.driver = driver;
         this.origin = this.driver.city.getNearestIntersection( this.driver.taxi.x , this.driver.taxi.y );
         this.dest = dest;
         this.path = this.driver.city.getShortestPath( this.origin , this.dest );
         this.actual = 0;
+        
+        System.out.println("Driver " + driver.index + ": going to " + dest + " from " + this.path.get(actual) + " with a distance of " + this.driver.city.getTotalDistance(this.path) );
     }
 
     @Override

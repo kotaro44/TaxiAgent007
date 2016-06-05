@@ -131,8 +131,6 @@ public class City extends JPanel {
         
         this.h = (this.height - this.margin_y*2)*2;
         this.w = this.width - this.margin_x*2;
-        
-    
        
     }
     
@@ -229,7 +227,7 @@ public class City extends JPanel {
         }
         
         //draw Taxi Center
-        g.setColor(Color.RED); //taxi center
+        g.setColor(Color.DARK_GRAY); //taxi center
         g.fillRect( 22 + scaleX(this.taxi_center[0]) ,  scaleY(this.taxi_center[1]) - 35, 30 , 30 ); 
         
         //draw Taxis
@@ -288,9 +286,18 @@ public class City extends JPanel {
         }
     }
     
+    //This function throws errors of concurrent modification
     public LinkedList<Intersection> getShortestPath( Intersection from, Intersection to){
         dijkstra.execute(from);
         return dijkstra.getPath(to);
+    }
+    
+    public double getTotalDistance(LinkedList<Intersection> path){
+        double result = 0;
+        for( int i = 1 ; i < path.size() ; i++  ){
+            result += path.get(i-1).distance(path.get(i));
+        }
+        return result;
     }
     
     public Intersection[] getIntersections() //just in case we need a copy of intersections[]

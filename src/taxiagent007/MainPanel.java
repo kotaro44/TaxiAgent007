@@ -5,10 +5,12 @@
  */
 package taxiagent007;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import javax.swing.GroupLayout;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
@@ -50,7 +52,57 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
                 .addComponent(city, javax.swing.GroupLayout.PREFERRED_SIZE, 570, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(28, Short.MAX_VALUE))
         );
+       
         
+    }
+    
+    public void setTaxiLabels(){
+        taxi_labels = new javax.swing.JLabel[this.city.company.taxi_props.length][3];
+        for( int i = 0 ; i < taxi_labels.length; i++ ){
+            taxi_labels[i][0] = new javax.swing.JLabel();
+            taxi_labels[i][1] = new javax.swing.JLabel();
+            taxi_labels[i][2] = new javax.swing.JLabel();
+            
+            taxi_labels[i][0].setFont(new java.awt.Font("Tahoma", 1, 11));
+            taxi_labels[i][0].setText("Taxi driver " + (i+1));
+            taxi_labels[i][0].setForeground( (Color)this.city.company.taxi_props[i][2] );
+            taxi_labels[i][1].setText(State.WAITING_FOR_COMPANY.name());
+            taxi_labels[i][2].setText("Profit: NT$0");
+
+        }
+        
+       
+        javax.swing.GroupLayout taxi_state_panelLayout = new javax.swing.GroupLayout(taxi_state_panel);
+        taxi_state_panel.setLayout(taxi_state_panelLayout);
+        
+        GroupLayout.SequentialGroup seq_group = taxi_state_panelLayout.createSequentialGroup()
+                .addContainerGap();
+        
+        GroupLayout.ParallelGroup par_group = taxi_state_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING);
+                    
+        for( javax.swing.JLabel[] labels : taxi_labels ){
+            for( javax.swing.JLabel label : labels ){
+                par_group.addComponent(label);
+                seq_group.addComponent(label);
+            }
+            seq_group.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED);
+        } 
+        
+        seq_group.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE);
+        
+        
+        taxi_state_panelLayout.setHorizontalGroup(
+            taxi_state_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(taxi_state_panelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(par_group).addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        
+        taxi_state_panelLayout.setVerticalGroup(
+            taxi_state_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(seq_group)
+        );
+    
     }
 
     /**
@@ -64,22 +116,25 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
 
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
-        time_label = new javax.swing.JLabel();
-        lambda_label = new javax.swing.JLabel();
-        poisson_label = new javax.swing.JLabel();
-        calls_label = new javax.swing.JLabel();
         anim_slider = new javax.swing.JSlider();
-        totalminutes_label = new javax.swing.JLabel();
         animdelay_label = new javax.swing.JLabel();
         frame_slider = new javax.swing.JSlider();
         frame_label = new javax.swing.JLabel();
+        taxi_state_panel = new javax.swing.JPanel();
+        calls_label = new javax.swing.JLabel();
+        company_label = new javax.swing.JLabel();
+        company_state_label = new javax.swing.JLabel();
+        company_profit_label = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        console = new javax.swing.JTextArea();
         time_slider = new javax.swing.JSlider();
+        time_label = new javax.swing.JLabel();
+        totalminutes_label = new javax.swing.JLabel();
+        lambda_label = new javax.swing.JLabel();
+        poisson_label = new javax.swing.JLabel();
+        chargekm_label = new javax.swing.JLabel();
+        gaskm_label = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -90,19 +145,12 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 807, Short.MAX_VALUE)
+            .addGap(0, 0, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 580, Short.MAX_VALUE)
+            .addGap(0, 642, Short.MAX_VALUE)
         );
-
-        jButton1.setText("Apply");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
 
         jButton2.setText("Start");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -118,14 +166,6 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
             }
         });
 
-        time_label.setText("12:00 A.M.");
-
-        lambda_label.setText("λ = 1");
-
-        poisson_label.setText("p(4) = 1");
-
-        calls_label.setText("0 call(s)");
-
         anim_slider.setMaximum(1000);
         anim_slider.setMinimum(10);
         anim_slider.setValue(150);
@@ -134,8 +174,6 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
                 anim_sliderStateChanged(evt);
             }
         });
-
-        totalminutes_label.setText("0 second(s) in total");
 
         animdelay_label.setText("Animation Delay: 150ms");
 
@@ -150,41 +188,54 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
 
         frame_label.setText("Frame: 20 seconds");
 
+        taxi_state_panel.setBackground(new java.awt.Color(251, 250, 250));
+
+        javax.swing.GroupLayout taxi_state_panelLayout = new javax.swing.GroupLayout(taxi_state_panel);
+        taxi_state_panel.setLayout(taxi_state_panelLayout);
+        taxi_state_panelLayout.setHorizontalGroup(
+            taxi_state_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 224, Short.MAX_VALUE)
+        );
+        taxi_state_panelLayout.setVerticalGroup(
+            taxi_state_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
+        calls_label.setText("0 call(s)");
+
+        company_label.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        company_label.setText("Taxi Agent Company");
+
+        company_state_label.setText("WAITING_FOR_CALLS");
+
+        company_profit_label.setText("Company Profit: NT$0");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addComponent(jButton2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton3)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(frame_slider, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(anim_slider, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(animdelay_label)
+                            .addComponent(frame_label))
+                        .addGap(0, 109, Short.MAX_VALUE))
+                    .addComponent(taxi_state_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                                .addComponent(time_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButton1))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(lambda_label)
-                                    .addComponent(poisson_label)
-                                    .addComponent(calls_label))
-                                .addGap(0, 0, Short.MAX_VALUE))))
-                    .addComponent(anim_slider, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(animdelay_label)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(totalminutes_label))
-                            .addComponent(frame_slider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(frame_label))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                        .addComponent(jButton2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton3))
+                    .addComponent(company_label)
+                    .addComponent(calls_label)
+                    .addComponent(company_state_label)
+                    .addComponent(company_profit_label))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -194,14 +245,16 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
                     .addComponent(jButton2)
                     .addComponent(jButton3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lambda_label)
+                .addComponent(company_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(poisson_label)
+                .addComponent(company_state_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(calls_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(totalminutes_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(company_profit_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(taxi_state_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(frame_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(frame_slider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -209,20 +262,10 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
                 .addComponent(animdelay_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(anim_slider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(time_label))
-                .addContainerGap())
+                .addGap(31, 31, 31))
         );
 
-        totalminutes_label.getAccessibleContext().setAccessibleName("totalminutes_label");
-
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
-
-        console.setColumns(20);
-        console.setRows(5);
-        jScrollPane1.setViewportView(console);
 
         time_slider.setMaximum(86399);
         time_slider.setValue(0);
@@ -232,25 +275,60 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
             }
         });
 
+        time_label.setText("12:00 A.M.");
+
+        totalminutes_label.setText("0 second(s) in total");
+
+        lambda_label.setText("λ = 1");
+
+        poisson_label.setText("p(4) = 1");
+
+        chargekm_label.setText("Charge/KM: NT$40");
+
+        gaskm_label.setText("Gas/KM: NT$6");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jScrollPane1)
-                    .addComponent(time_slider, javax.swing.GroupLayout.DEFAULT_SIZE, 795, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(time_slider, javax.swing.GroupLayout.DEFAULT_SIZE, 804, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addComponent(time_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
+                        .addComponent(totalminutes_label))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lambda_label)
+                            .addComponent(poisson_label)
+                            .addComponent(chargekm_label)
+                            .addComponent(gaskm_label))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lambda_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(poisson_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(chargekm_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(gaskm_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(time_slider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(time_label)
+                    .addComponent(totalminutes_label))
                 .addContainerGap())
         );
+
+        totalminutes_label.getAccessibleContext().setAccessibleName("totalminutes_label");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -259,7 +337,7 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
@@ -275,10 +353,6 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        JOptionPane.showMessageDialog(null, "My Goodness, this is so concise");
-    }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         this.startAnimation();
@@ -324,24 +398,36 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
 
     private void updateLabels(){
         
-        this.lambda_label.setText( "λ = " + this.city.lambda);
-        this.poisson_label.setText( "p(" + this.city.k + ") = " + city.poisson(this.city.k ));
-        
         //time label
         int hour = ((MainPanel.seconds/60)/60)%12;
         if( hour == 0 )
             hour = 12;
         int minutes = (MainPanel.seconds/60)%60;
-        int seconds = MainPanel.seconds%60;
+        int secs = MainPanel.seconds%60;
         String xm = (MainPanel.seconds<60*60*12)?"A.M.":"P.M.";
         
-        this.time_label.setText( (hour<10?"0":"") + hour + ":" + (minutes<10?"0":"") + minutes + ":" + (seconds<10?"0":"") + seconds + " " + xm );
+        this.time_label.setText( (hour<10?"0":"") + hour + ":" + (minutes<10?"0":"") + minutes + ":" + (secs<10?"0":"") + secs + " " + xm );
         
-        //calls label
+        //variable label
+        this.lambda_label.setText( "λ = " + this.city.lambda);
+        this.poisson_label.setText( "p(" + this.city.k + ") = " + city.poisson(this.city.k ) );
         this.calls_label.setText(city.totalCalls + " call(s)");
         this.totalminutes_label.setText( MainPanel.total_seconds + " second(s) in total");
         this.animdelay_label.setText( "Animation delay: " + this.anim_slider.getValue() + "ms");
         this.frame_label.setText( "Frame: " + MainPanel.frame + " seconds");
+        this.gaskm_label.setText("Gas/KM: NT$" + this.company.gas_cost_km*7);
+        this.chargekm_label.setText("Charge/KM: NT$" + this.company.charge_rate_km*7);
+        
+        //taxi labels
+        for( int i = 0 ; i < this.taxi_labels.length ; i++ ){
+            taxi_labels[i][2].setText("Profit: NT$" + this.company.taxis.get(i).driver.profit );
+            taxi_labels[i][1].setText( this.company.taxis.get(i).driver.state.name() );
+        }
+        
+        //company labels
+        this.company_profit_label.setText("Company Profit: NT$" + this.company.profit );
+        this.company_state_label.setText(this.company.state.name());
+        
     }
     
     private void update(){
@@ -359,10 +445,6 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
             }*/
             
             this.updateLabels();
-        }
-        
-        if( this.text2write.length() > this.characters ){
-            this.console.setText(this.text2write.substring(0, ++this.characters ));
         }
     }
     
@@ -456,23 +538,27 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
     public City city;
     String text2write = "";
     int characters = 0;
+    private javax.swing.JLabel[][] taxi_labels;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSlider anim_slider;
     private javax.swing.JLabel animdelay_label;
     private javax.swing.JLabel calls_label;
-    private javax.swing.JTextArea console;
+    private javax.swing.JLabel chargekm_label;
+    private javax.swing.JLabel company_label;
+    private javax.swing.JLabel company_profit_label;
+    private javax.swing.JLabel company_state_label;
     private javax.swing.JLabel frame_label;
     private javax.swing.JSlider frame_slider;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel gaskm_label;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lambda_label;
     private javax.swing.JLabel poisson_label;
+    private javax.swing.JPanel taxi_state_panel;
     private javax.swing.JLabel time_label;
     private javax.swing.JSlider time_slider;
     private javax.swing.JLabel totalminutes_label;

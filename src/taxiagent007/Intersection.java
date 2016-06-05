@@ -73,6 +73,6 @@ public class Intersection {
     
     @Override
     public String toString() { 
-        return index + ": {" + this.x + "," + this.y + "}"; 
+        return "<" + index + ">-{" + this.x + "," + this.y + "}"; 
     }
 }

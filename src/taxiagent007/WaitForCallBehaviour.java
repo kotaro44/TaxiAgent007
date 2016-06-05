@@ -21,12 +21,37 @@ public class WaitForCallBehaviour extends Behaviour {
     
     public WaitForCallBehaviour(Driver driver){
         this.driver = driver;
+        this.driver.state = State.WAITING_FOR_COMPANY;
     }
    
     
     @Override
     public void action() {
-        ACLMessage msg = this.myAgent.receive();
+        switch(this.driver.state){
+            case WAITING_FOR_COMPANY:
+                ACLMessage msg = this.myAgent.receive();
+                if (msg != null && !received ) {
+                   
+                    String passenger = msg.getContent();
+                    System.out.println("Driver " + driver.index +  ": They asked me to go to: " + passenger);
+                    
+                    Pattern p = Pattern.compile("\\{\\d+\\,\\d+\\}");
+                    Matcher m = p.matcher(passenger);
+
+                    m.find();
+                    Intersection origin = driver.city.getNearestIntersection(m.group());
+
+                    m.find();
+                    Intersection destination = driver.city.getNearestIntersection(m.group());
+                    
+                    driver.addBehaviour(new BidBehaviour( origin ,destination , this.driver , msg ));
+                }
+                break;
+        }
+        
+        
+        
+        /*ACLMessage msg = this.myAgent.receive();
         if (msg != null && !received ) {
            
             String passenger = msg.getContent();
@@ -47,18 +72,24 @@ public class WaitForCallBehaviour extends Behaviour {
             
             RejectCallBehaviour b = new RejectCallBehaviour( driver );
             driver.addBehaviour( b );
+            
+            this.driver.state = State.GOING_FOR_PASSENGER;
             driver.addBehaviour(new GoToLocationBehaviour( origin , driver ){
                 @Override
                 public int onEnd(){
+                    this.driver.state = State.PICKING_PASSENGER;
                     driver.addBehaviour(new PickCostumerBehaviour( driver ){
                         @Override
                         public int onEnd(){
+                            this.driver.state = State.TAKING_PASSENGER;
                             driver.addBehaviour(new GoToLocationBehaviour( destination , driver ){
                                 @Override
                                 public int onEnd(){
+                                    this.driver.state = State.DROPING_PASSENGER;
                                     driver.addBehaviour(new DropCostumerBehaviour( driver ){
                                         @Override
                                         public int onEnd(){
+                                            this.driver.state = State.WAITING_FOR_COMPANY;
                                             driver.removeBehaviour(b);
                                             driver.addBehaviour(new WaitForCallBehaviour( driver ) );
                                             return 0;
@@ -75,7 +106,7 @@ public class WaitForCallBehaviour extends Behaviour {
             });
             
             received = true;
-        }
+        }*/
     }
 
     @Override

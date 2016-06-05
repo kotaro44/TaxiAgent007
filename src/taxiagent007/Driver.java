@@ -17,6 +17,8 @@ public class Driver extends Agent {
     public Taxi taxi;
     public City city;
     public int index;
+    public int profit;
+    public State state;
     
     public Taxi getTaxi(){
         return this.taxi;
@@ -45,7 +47,8 @@ public class Driver extends Agent {
         this.taxi = (Taxi)args[0];
         this.city = (City)args[1];
         this.index = (Integer)args[2];
-        System.out.println("Driver is ready!");
+        this.taxi.driver = this;
+        System.out.println("Driver" + index + " is ready!");
         //this.AddBehaviour();
  
         this.addBehaviour(new WaitForCallBehaviour(this){

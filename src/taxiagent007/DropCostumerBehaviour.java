@@ -29,6 +29,8 @@ public class DropCostumerBehaviour extends Behaviour {
             Intersection actual = driver.city.getNearestIntersection( driver.taxi.x , driver.taxi.y );
             actual.dropPassenger(driver.taxi.passenger);
             driver.taxi.passenger = null;
+            driver.profit++;
+            driver.city.company.profit++;
         }
     }
 

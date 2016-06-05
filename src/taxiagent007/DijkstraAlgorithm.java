@@ -101,7 +101,7 @@ public class DijkstraAlgorithm {
     return settledNodes.contains(vertex);
   }
 
-  private int getShortestDistance(Intersection destination) {
+  public int getShortestDistance(Intersection destination) {
     Integer d = distance.get(destination);
     if (d == null) {
       return Integer.MAX_VALUE;

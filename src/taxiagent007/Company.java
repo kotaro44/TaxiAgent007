@@ -24,17 +24,23 @@ import java.util.Queue;
  * @author kotaro and fabio :)
  */
 public class Company extends Agent {
+    public State state = State.PREPARING;
+    
     boolean ready = false;
     MainPanel mainpanel;
     ArrayList<Taxi> taxis = new ArrayList<>();
     ArrayList<Passenger> passengers;
     public int askingTo = 1;
     public String driverName = "TaxiDriver";
-    public Object[][] taxi_props = {{1,1,Color.ORANGE},
-                             {15,50,Color.BLACK},
-                             {1,50,Color.PINK},
-                             {100,50,Color.GREEN},
-                             {100,1,Color.WHITE}};
+    public int profit = 0;
+    public Object[][] taxi_props = {{57,29,Color.ORANGE},
+                             {57,29,Color.CYAN}};/*,
+                             {57,29,Color.PINK},
+                             {57,29,Color.GREEN},
+                             {57,29,Color.BLACK}};*/
+    
+    public double charge_rate_km = 40.0/7.0;
+    public double gas_cost_km = 6.0/7.0;
 
   
     public void onPanelReady(MainPanel mainpanel){
@@ -42,7 +48,9 @@ public class Company extends Agent {
         this.mainpanel.city.setCompany(this);
         this.passengers = new ArrayList<>();
         hireTaxiAgents();
-        this.addBehaviour(new AssignPassengerBehaviour(this));
+        this.mainpanel.setTaxiLabels();
+        
+        this.addBehaviour(new ProcessCallsBehaviour(this));
     }
     
     public void hireTaxiAgents(){
