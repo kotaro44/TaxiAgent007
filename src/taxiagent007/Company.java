@@ -33,11 +33,21 @@ public class Company extends Agent {
     public int askingTo = 1;
     public String driverName = "TaxiDriver";
     public int profit = 0;
-    public Object[][] taxi_props = {{57,29,Color.ORANGE},
-                             {57,29,Color.CYAN},
-                             {57,29,Color.PINK},
-                             {57,29,Color.GREEN}};/*,
-                             {57,29,Color.BLACK}};*/
+    public Object[][] taxi_props = 
+                             {{57,29,Color.ORANGE,Shift.FROM_3AM_TO_1PM},
+                             {57,29,Color.BLACK,Shift.FROM_3AM_TO_1PM},
+                             {57,29,Color.BLUE,Shift.FROM_3AM_TO_1PM},
+                             {57,29,Color.GREEN,Shift.FROM_3AM_TO_1PM},
+                             
+                             {57,29,Color.MAGENTA,Shift.FROM_6PM_TO_4AM},
+                             {57,29,Color.DARK_GRAY,Shift.FROM_6PM_TO_4AM},
+                             {57,29,Color.YELLOW,Shift.FROM_6PM_TO_4AM},
+                             {57,29,Color.RED,Shift.FROM_6PM_TO_4AM},
+                             
+                             {57,29,Color.orange,Shift.FROM_9AM_TO_7PM},
+                             {57,29,Color.PINK,Shift.FROM_9AM_TO_7PM},
+                             {57,29,Color.LIGHT_GRAY,Shift.FROM_9AM_TO_7PM},
+                             {57,29,Color.cyan,Shift.FROM_9AM_TO_7PM}};
     
     public double charge_rate_km = 40.0/7.0;
     public double gas_cost_km = 6.0/7.0;
@@ -57,11 +67,14 @@ public class Company extends Agent {
         try {
             int i = 1;
             for( Object[] props : this.taxi_props ){
-                Object[] taxi = new Object[3];
-                taxi[0] = new Taxi( (int) props[0] ,(int) props[1], (Color) props[2] );
-                taxi[1] = this.mainpanel.city;
-                taxi[2] = i;
-                AgentController new_agent = cc.createNewAgent(driverName + i++, "taxiagent007.Driver", taxi );
+                Object[] taxi_params = { 
+                    new Taxi( (int) props[0] ,(int) props[1], (Color) props[2] ),
+                    this.mainpanel.city,
+                    i,
+                    (Shift) props[3]
+                };
+                
+                AgentController new_agent = cc.createNewAgent(driverName + i++, "taxiagent007.Driver", taxi_params );
 
                 new_agent.start();
                 
@@ -73,7 +86,7 @@ public class Company extends Agent {
                     }
                
                 //os 3 taxis estavam a accessar esse lista ao mesmo tempo, causando erro.
-                this.taxis.add((Taxi)taxi[0]); 
+                this.taxis.add((Taxi)taxi_params[0]); 
             }
         } catch (StaleProxyException ex) {
             Logger.getLogger(Company.class.getName()).log(Level.SEVERE, null, ex);

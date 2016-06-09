@@ -36,11 +36,14 @@ public class City extends JPanel {
     Graph graph;
     
     public int totalCalls = 0;
+    public int callsHour = 0;
+    public int last_callHour = 0;
     
     public Intersection[] intersections; //ver aqui
     
     int last = 0;
-    int total = 0;
+    int total_minute = 0;
+    int total_hour = 0;
     
     //behaviour variables
     int lambda = 1;
@@ -241,15 +244,25 @@ public class City extends JPanel {
         int tr = 10;
         for ( int i = 0 ; i < this.company.taxis.size() ; i++ ) {
             Taxi taxi = this.company.taxis.get(i);
+            
             if( taxi != null ){
-                if( taxi.passenger != null ){
-                    g.setColor(Color.red);
-                    tr += 5;
+                if( taxi.driver.state != State.OUT_OF_SERVICE ){
+                    if( taxi.passenger != null ){
+                        g.setColor(Color.WHITE);
+                        tr += 5;
+                        g.fillOval( scaleX(taxi.x) - tr/2, scaleY(taxi.y)- tr/2, tr, tr);
+                        tr -= 5;
+                        g.setColor(taxi.color);
+                        g.drawString("X", scaleX(taxi.passenger.destination.x) - 5, scaleY(taxi.passenger.destination.y) + 5 ); 
+                        
+                    }
+                    g.setColor(taxi.color);
                     g.fillOval( scaleX(taxi.x) - tr/2, scaleY(taxi.y)- tr/2, tr, tr);
-                    tr -= 5;
+                }else{
+                    g.setColor(taxi.color);
+                    g.fillOval( 62 + scaleX(this.taxi_center[0]) - tr/2 + tr*(i%4) , 
+                            scaleY(this.taxi_center[1]) - tr/2 - 35 + tr*(i/4) , tr, tr);
                 }
-                g.setColor(taxi.color);
-                g.fillOval( scaleX(taxi.x) - tr/2, scaleY(taxi.y)- tr/2, tr, tr);
             }
         }
 
@@ -282,24 +295,45 @@ public class City extends JPanel {
     public void updateCity(){
         int actual = MainPanel.seconds;
         int elapsed = actual - last ;
-        if( elapsed >= 0 )
-            total += elapsed;
+        
+        if( elapsed >= 0 ){
+            total_minute += elapsed;
+            total_hour += elapsed;
+        }
+        
+        for( Taxi taxi : this.company.taxis ){
+            taxi.driver.update( elapsed );
+        }
        
-        if( total >= 60 ){
-            total = 0;
-            if( isThereAnyAvailableIntersection() && Math.random() < this.poisson(this.k) ){
-                Intersection intersection;
-                do{ 
-                    intersection = this.intersections[ (int)Math.floor(Math.random()*this.intersections.length) ];
-                }while( intersection.passenger != null );
-                Passenger new_passenger = new Passenger( intersection , this.intersections , this.totalCalls++ );
-                this.passengers.add(new_passenger);
-                intersection.receiveCall( new_passenger );
-                this.company.callTaxi(new_passenger);
+        if( total_minute >= 60*2 ){//Every 2 minute
+            total_minute = 0;
+            if( Math.random() < this.poisson(this.k) ){
+                this.makeCall();
             }
         }
+        
+        if( total_hour >= 60*60 ){//every hour
+            total_hour = 0;
+            this.callsHour = this.totalCalls - this.last_callHour;
+            this.last_callHour = this.totalCalls;
+        }
+        
         last = actual;
        
+    }
+    
+    public void makeCall(){
+        if( !isThereAnyAvailableIntersection() )
+            return;
+        
+        Intersection intersection = null;
+        do{ 
+            intersection = this.intersections[ (int)Math.floor(Math.random()*this.intersections.length) ];
+        }while( intersection.passenger != null );
+        Passenger new_passenger = new Passenger( intersection , this.intersections , this.totalCalls++ );
+        this.passengers.add(new_passenger);
+        intersection.receiveCall( new_passenger );
+        this.company.callTaxi(new_passenger);
     }
 
     public void resolveAll() {

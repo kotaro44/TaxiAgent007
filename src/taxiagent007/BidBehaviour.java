@@ -44,15 +44,7 @@ public class BidBehaviour extends Behaviour {
                     this.maxPayOff = chargeable_dist*this.driver.city.company.charge_rate_km - total_dist*this.driver.city.company.gas_cost_km;
                     this.driver.last_profit = this.maxPayOff;
                     
-                    ACLMessage reply = this.msg.createReply();
-                    if( myBid >= maxPayOff-1 || maxPayOff < 0 ){
-                        reply.setContent(this.driver.index + ":0");
-                    }else{
-                        reply.setContent(this.driver.index + ":" + this.myBid );
-                        this.driver.last_max_bid = this.myBid;
-                    }
-                    
-                    this.driver.send(reply);
+                    this.driver.bid( msg , this.myBid , this.maxPayOff);
                     this.driver.state = State.WAITING_FOR_COMPANY_DECISION;
                 break;
             case WAITING_FOR_COMPANY_DECISION:
@@ -63,7 +55,7 @@ public class BidBehaviour extends Behaviour {
         
                     if( company_decision.compareTo("GO") == 0 ){
                         this.driver.state = State.WON_BID_RESTING;
-                        this.driver.requests.add( new Request( origin , destiny , this.maxPayOff , this.myBid , this.passenger_id ) );
+                        this.driver.wonBid( origin , destiny , maxPayOff , myBid , passenger_id);
                         this.driver.removeBehaviour(this);
                     } else if( company_decision.compareTo("Sorry") == 0 ){
                         this.driver.state = State.WAITING_FOR_COMPANY;

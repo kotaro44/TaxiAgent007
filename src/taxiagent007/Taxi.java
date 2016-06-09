@@ -17,7 +17,7 @@ public class Taxi  {
     public Color color;
     public Passenger passenger;
     public Driver driver;
-    public double speed = (((30.0*7.0)/60)/60); //30km/h   scale=7 transformed to seconds
+    public double speed = (((30.0*7.0)/60)/60); // (units/sec) calculated from  30km/h scale=7 transformed to seconds
     
     private int actual = 0;
     private int last = 0;

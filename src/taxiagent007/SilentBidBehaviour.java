@@ -42,16 +42,7 @@ public class SilentBidBehaviour extends Behaviour {
         this.driver.removeBehaviour(this);
     }
     
-    public void bid( ACLMessage msg ){
-        ACLMessage reply = msg.createReply();
-        if( myBid >= maxPayOff-1 || maxPayOff < 0){
-            reply.setContent(this.driver.index + ":0");
-        }else{
-            reply.setContent(this.driver.index + ":" + this.myBid );
-            this.driver.last_max_bid = this.myBid;
-        }
-        this.driver.send(reply);
-    }
+    
     
     @Override
     public void action() {
@@ -86,7 +77,7 @@ public class SilentBidBehaviour extends Behaviour {
                 this.driver.last_profit = this.maxPayOff;
                 possible_request.price = this.maxPayOff;
                 
-                this.bid(msg);
+                this.driver.bid(msg, myBid, maxPayOff);
                 
                 silent_biding = true;
             }else{
@@ -99,7 +90,7 @@ public class SilentBidBehaviour extends Behaviour {
                 String company_decision = msg.getContent();
                 if( company_decision.compareTo("GO") == 0 ){
                     //WE WON
-                    this.driver.requests.add( possible_request );
+                    this.driver.wonBid( possible_request );
                     silent_biding = false;
                     this.myBid = 1;
                     if( this.stop )
@@ -115,7 +106,7 @@ public class SilentBidBehaviour extends Behaviour {
                     //CAN CONTINUE BIDDING
                     this.myBid = Integer.parseInt(company_decision) + 1;
                     this.possible_request.company_cut = this.myBid;
-                    this.bid(msg);
+                    this.driver.bid(msg,myBid, maxPayOff);
                 }
             }
         }
