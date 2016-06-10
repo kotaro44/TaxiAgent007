@@ -44,7 +44,7 @@ public class BidBehaviour extends Behaviour {
                     this.maxPayOff = chargeable_dist*this.driver.city.company.charge_rate_km - total_dist*this.driver.city.company.gas_cost_km;
                     this.driver.last_profit = this.maxPayOff;
                     
-                    this.driver.bid( msg , this.myBid , this.maxPayOff);
+                    this.driver.bid( msg , this.myBid , this.maxPayOff , this.origin , this.destiny );
                     this.driver.state = State.WAITING_FOR_COMPANY_DECISION;
                 break;
             case WAITING_FOR_COMPANY_DECISION:

@@ -77,7 +77,7 @@ public class SilentBidBehaviour extends Behaviour {
                 this.driver.last_profit = this.maxPayOff;
                 possible_request.price = this.maxPayOff;
                 
-                this.driver.bid(msg, myBid, maxPayOff);
+                this.driver.bid(msg, myBid, maxPayOff,this.possible_request);
                 
                 silent_biding = true;
             }else{
@@ -106,7 +106,7 @@ public class SilentBidBehaviour extends Behaviour {
                     //CAN CONTINUE BIDDING
                     this.myBid = Integer.parseInt(company_decision) + 1;
                     this.possible_request.company_cut = this.myBid;
-                    this.driver.bid(msg,myBid, maxPayOff);
+                    this.driver.bid(msg,myBid, maxPayOff,this.possible_request);
                 }
             }
         }

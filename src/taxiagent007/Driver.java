@@ -39,19 +39,90 @@ public class Driver extends Agent {
         return this.city;
     }
     
-    public void bid( ACLMessage msg , double bidValue , double maxPayOff ){
+    
+    public double distance_to_complete_request(Intersection location , Request request ){
+        double requests_dist = 0;
+        requests_dist += city.getTotalDistance( location , this.actual_request.origin );
+        requests_dist += city.getTotalDistance( this.actual_request.origin , this.actual_request.destiny );
+        return requests_dist;
+    }
+    
+    public void bid( ACLMessage msg , double bidValue , double maxPayOff , Intersection origin , Intersection destiny ){
+        Request tmp_request = new Request(origin,destiny,0,0,-1);
+        this.bid(msg, bidValue, maxPayOff, tmp_request);
+    }
+    
+    public void bid( ACLMessage msg , double bidValue , double maxPayOff , Request new_request ){
+        
         ACLMessage reply = msg.createReply();
-        //Can't Bid IF:
-        // - My Bid is bigger than my max Profit
-        // - I can't get profit from the task
-        // - I won a bid recently 
-        // - going home
-        if( bidValue >= maxPayOff-1 || maxPayOff < 0 || this.cantBidIn != 0 ){
+        
+        //calculate total time of completing my job
+        double total_requests_time = 0;
+        Request last_request = null;
+        Intersection last_intersection = null;
+        if( actual_request != null ){
+            last_request = actual_request;
+        }else if( !this.requests.isEmpty() ){
+                last_request = this.requests.get(0);
+        }
+            
+        if( last_request != null ){ 
+            //First Request time calculation
+            Intersection nearest_intersection = city.getNearestIntersection(this.taxi.x, this.taxi.y);
+            if( this.taxi.passenger != null ){
+                total_requests_time += city.getTotalDistance( nearest_intersection , last_request.destiny );
+                total_requests_time += nearest_intersection.distance(this.taxi.x, this.taxi.y);
+            }else{
+                total_requests_time += distance_to_complete_request(nearest_intersection,last_request);
+            }
+            
+            //Rest request time calculation
+            for( int i = 1 ; i < this.requests.size() ; i++ ){
+                Request req = this.requests.get(i);
+                total_requests_time += city.getTotalDistance( last_request.destiny , req.origin );
+                total_requests_time += city.getTotalDistance( req.origin , req.destiny );
+            }
+            
+            if( this.requests.isEmpty() )
+                last_intersection = actual_request.destiny;
+            else
+                last_intersection = this.requests.get( this.requests.size() - 1).destiny;
+           
+        }else {
+            last_intersection = city.getNearestIntersection(this.taxi.x, this.taxi.y);
+            total_requests_time += last_intersection.distance(this.taxi.x, this.taxi.y);
+        }
+        
+        //NEW request time calculation
+        total_requests_time += city.getTotalDistance( last_intersection , new_request.origin );
+        total_requests_time += city.getTotalDistance( new_request.origin , new_request.destiny );
+        
+        
+        total_requests_time = total_requests_time/this.taxi.speed;
+        System.out.println("Driver " + this.index + ": I will take " + total_requests_time + "s");
+           
+        //Can't Bid IF:  
+        if( bidValue >= maxPayOff-1 ){
+            // - My Bid is bigger than my max Profit
+            System.out.println("Driver " + this.index + ": the big is too high for me");
+            reply.setContent(this.index + ":0");
+        } else if ( maxPayOff <= 0 ){
+            // - I can't get profit from the task
+            System.out.println("Driver " + this.index + ": I can't get any profit from that request");
+            reply.setContent(this.index + ":0");
+        } else if ( this.cantBidIn != 0 ){
+            // - I won a bid recently 
+            System.out.println("Driver " + this.index + ": I won a bid recently");
+            reply.setContent(this.index + ":0");
+        } else if( !this.timeOfDuty( MainPanel.seconds + (int)(total_requests_time) ) ){
+            // - I'll be out of duty taking that passanger
+            System.out.println("Driver " + this.index + ": I don't have time for that");
             reply.setContent(this.index + ":0");
         }else{
             reply.setContent(this.index + ":" + bidValue);
             this.last_max_bid = bidValue;
         }
+        
         this.send(reply);
     }
     
@@ -69,26 +140,34 @@ public class Driver extends Agent {
         this._wonbid(new_req);
     }
     
+    public boolean timeOfDuty( int seconds ){
+        seconds = (seconds%(60*60*24));
+        boolean should_working = false;
+        
+        switch( this.shift ){
+            case FROM_3AM_TO_1PM:
+                    should_working = ( seconds >= 3*3600 && seconds <= 13*3600 );
+                break;
+            case FROM_6PM_TO_4AM:
+                    should_working = !( seconds >= 4*3600 && seconds <= 18*3600 );
+                break;
+            case FROM_9AM_TO_7PM:
+                    should_working = ( seconds >= 9*3600 && seconds <= 19*3600 );
+                break;
+        }
+        
+        return should_working;
+    }
+    
     public void update( int elapsed_seconds ){
         
         this.cantBidIn -= elapsed_seconds;
         if( this.cantBidIn - elapsed_seconds <= 0 )
             this.cantBidIn = 0;
         
-        boolean should_working = false;
-        switch( this.shift ){
-            case FROM_3AM_TO_1PM:
-                    should_working = ( MainPanel.seconds >= 3*3600 && MainPanel.seconds <= 13*3600 );
-                break;
-            case FROM_6PM_TO_4AM:
-                    should_working = !( MainPanel.seconds >= 4*3600 && MainPanel.seconds <= 18*3600 );
-                break;
-            case FROM_9AM_TO_7PM:
-                    should_working = ( MainPanel.seconds >= 9*3600 && MainPanel.seconds <= 19*3600 );
-                break;
-        }
         
-        if( should_working ){
+        
+        if( timeOfDuty( MainPanel.seconds ) ){
             //should be working
             if( !working ){
                 working = true;

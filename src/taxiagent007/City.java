@@ -208,7 +208,7 @@ public class City extends JPanel {
         int r = 4;
         for (Intersection intersection : intersections ) {
             
-            r = 1*intersection.calls;
+            //r = 1*intersection.calls;
             g.setColor(Color.red);
             
             //draw Passenger
@@ -225,15 +225,15 @@ public class City extends JPanel {
                 g.drawString("P" + intersection.passenger.id, scaleX(intersection.x) + 5, scaleY(intersection.y) + 5 );  
                 
                 g.setColor(Color.yellow);
-            }else{
+            }/*else{
                 g.setColor(Color.blue);
-            }
+            }*/
             
-            g.fillOval(scaleX(intersection.x) - r/2,scaleY(intersection.y) - r/2, r, r);
+            /*g.fillOval(scaleX(intersection.x) - r/2,scaleY(intersection.y) - r/2, r, r);
             
             r = 1*intersection.drops.size();
             g.setColor(Color.white);
-            g.fillOval(scaleX(intersection.x) - r/2,scaleY(intersection.y) - r/2, r, r);
+            g.fillOval(scaleX(intersection.x) - r/2,scaleY(intersection.y) - r/2, r, r);*/
         }
         
         //draw Taxi Center
@@ -365,6 +365,10 @@ public class City extends JPanel {
             result += path.get(i-1).distance(path.get(i));
         }
         return result;
+    }
+    
+    public double getTotalDistance(Intersection origin, Intersection destiny){
+        return getTotalDistance( this.getShortestPath(origin, destiny) );
     }
     
     public Intersection[] getIntersections() //just in case we need a copy of intersections[]
