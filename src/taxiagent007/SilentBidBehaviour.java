@@ -21,10 +21,11 @@ public class SilentBidBehaviour extends Behaviour {
     public boolean stop = false;
     public Request possible_request;
     public double maxPayOff;
-    public double myBid = 1;
+    public double myBid;
     
     public SilentBidBehaviour(Driver driver){
         this.driver = driver;
+        this.myBid = this.driver.bidIncrease;
     }
     
     public void stop(){
@@ -67,18 +68,15 @@ public class SilentBidBehaviour extends Behaviour {
                 m.find();
                 String pid = m.group();
                 int passenger_id = Integer.parseInt( pid.substring(1, pid.length()) );
-                
-                possible_request = new Request( origin , destination , 0 , 0 , passenger_id );
-                
-                double chargeable_dist = possible_request.origin.distance(possible_request.destiny);
-                double total_dist = this.driver.actual_request.destiny.distance( this.driver.taxi.x , this.driver.taxi.y ) + chargeable_dist;
-
-                this.maxPayOff = chargeable_dist*this.driver.city.company.charge_rate_km - total_dist*this.driver.city.company.gas_cost_km;
-                this.driver.last_profit = this.maxPayOff;
-                possible_request.price = this.maxPayOff;
+               
+                double chargeable_dist = this.driver.city.getTotalDistance(origin, destination);
+                double total_dist =  this.driver.city.getTotalDistance(this.driver.taxi.x , this.driver.taxi.y , this.driver.actual_request.destiny ) + chargeable_dist;
+                double company_cut = 0.3*chargeable_dist*(this.driver.city.company.charge_rate_km - this.driver.city.company.gas_cost_km);
+                this.maxPayOff = chargeable_dist*this.driver.city.company.charge_rate_km - total_dist*this.driver.city.company.gas_cost_km - company_cut;
+                possible_request = new Request( origin , destination , this.maxPayOff , company_cut , 0 , passenger_id );
                 
                 this.driver.bid(msg, myBid, maxPayOff,this.possible_request);
-                
+          
                 silent_biding = true;
             }else{
                 if( this.stop )
@@ -99,13 +97,15 @@ public class SilentBidBehaviour extends Behaviour {
                     //WE LOOSE
                     possible_request = null;
                     silent_biding = false;
-                    this.myBid = 1;
+                    this.myBid = this.driver.bidIncrease;
                     if( this.stop )
                         this.finish();
                 } else{
                     //CAN CONTINUE BIDDING
-                    this.myBid = Integer.parseInt(company_decision) + 1;
-                    this.possible_request.company_cut = this.myBid;
+                    do{
+                        this.myBid += this.driver.bidIncrease;
+                    } while( (maxPayOff - this.myBid) >= Integer.parseInt(company_decision));
+                    this.possible_request.company_bid = this.myBid;
                     this.driver.bid(msg,myBid, maxPayOff,this.possible_request);
                 }
             }

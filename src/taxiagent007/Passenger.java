@@ -14,6 +14,8 @@ public class Passenger {
     public int id;
     public Intersection destination;
     public Intersection origin;
+    public int taxiId = -1;
+    public int payment = 0;
 
     public Passenger(Intersection origin, Intersection[] intersections , int id ){
         this.origin = origin;
@@ -27,15 +29,17 @@ public class Passenger {
                 dest = 0;
             }
             double rnd = Math.random();
-            double p = this.probability( this.origin.distance( this.destination ) );
+            double p = this.dest_probability( MainPanel.st_company.mainpanel.city.getTotalDistance(origin, destination) );
 
             if( rnd >  p ){
                 this.destination = this.origin;
             }
         }
+        
+        this.payment = (int)(MainPanel.st_company.mainpanel.city.getTotalDistance(origin, destination)*MainPanel.st_company.charge_rate_km);
     }
     
-    public double probability( double d ){
+    public double dest_probability( double d ){
         double sigma = 1.5*7;
         double m = 2*7;
         return (1/(sigma*Math.sqrt(2*Math.PI)))*Math.pow(Math.E, -1*Math.pow(d - m, 2)/2 )*sigma;

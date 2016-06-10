@@ -153,6 +153,7 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
         anim_slider = new javax.swing.JSlider();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Taxi Agent 007");
         setResizable(false);
 
         jPanel1.setBackground(new java.awt.Color(0, 153, 153));

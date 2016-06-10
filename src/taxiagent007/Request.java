@@ -14,12 +14,14 @@ public class Request {
     public Intersection destiny;
     public double company_cut;
     public double price;
+    public double company_bid;
     public int passenger_id;
     
-    public Request( Intersection origin , Intersection destiny , double price , double company_cut , int passenger_id ){
+    public Request( Intersection origin , Intersection destiny , double price , double company_cut , double company_bid , int passenger_id ){
         this.origin = origin;
         this.destiny = destiny;
         this.price = price;
+        this.company_bid = company_bid;
         this.company_cut = company_cut;
         this.passenger_id = passenger_id;
     }

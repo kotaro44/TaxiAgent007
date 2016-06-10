@@ -34,6 +34,7 @@ public class ProcessCallsBehaviour extends Behaviour {
     
     public void processPassenger(){
         this.company.state = State.WAITING_FOR_BIDS;
+        System.out.println("--------------------------------------------------");
         System.out.println("Company: Bididng Passenger " + this.attendee.id + "!!" );
         
         //send message to all Taxis that are in service'
@@ -62,10 +63,20 @@ public class ProcessCallsBehaviour extends Behaviour {
     }
     
     public int getMaxBidder(){
-        int max = Integer.parseInt(this.answers[0]);
+        int max = 0;
         int index = 0;
+        
+        for( int i = 0 ; i < this.answers.length ; i++ ){
+            max = Integer.parseInt(this.answers[i]);
+            if( max != 0 ){
+                index = i;
+                i = this.answers.length;
+            }
+        }
+        
         for( int i = 1 ; i < answers.length ; i++ ){
-            if( Integer.parseInt(this.answers[i]) > max ){
+            int bid = Integer.parseInt(this.answers[i]);
+            if(bid != 0 &&  bid < max ){
                 max = Integer.parseInt(this.answers[i]);
                 index = i;
             }
@@ -81,6 +92,15 @@ public class ProcessCallsBehaviour extends Behaviour {
             }
         }
         return amount_bidders==1;
+    }
+    
+    public boolean nobodyCan(){
+        for ( String answer : answers ) {
+            if (  Integer.parseInt(answer) != 0 ) {
+                return false;
+            }
+        }
+        return true;
     }
     
     @Override
@@ -102,8 +122,11 @@ public class ProcessCallsBehaviour extends Behaviour {
                         this.maxBidder = this.getMaxBidder();
                         if( this.noMoreBids() ){
                             //Finish Auction
+                            System.out.println("Driver " + (this.maxBidder+1) + " bids " + this.answers[this.maxBidder] + "!");
                             System.out.println("Give request to: " + (this.maxBidder+1) );
+                            System.out.println("--------------------------------------------------");
                             
+                            this.attendee.taxiId = this.maxBidder;
                             //notify the rest of bidders
                             for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
                                 if( isOutOfService(i-1) ){
@@ -128,23 +151,46 @@ public class ProcessCallsBehaviour extends Behaviour {
                             this.company.state = State.WAITING_FOR_CALLS;
                             
                         }else{
-                            //Notify Auctioners about biggest Bid
-                            System.out.println("Max bidder until now: " + (this.maxBidder+1) );
-                            int amount = Integer.parseInt(this.answers[this.maxBidder]);
-                            
-                            //notify the rest of bidders
-                            for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
-                                if( this.maxBidder+1 != i ){
+                            //if nobody can take the passenger
+                            if( this.nobodyCan() ){
+                                System.out.println("Company: I'm so sorry but nobody can take passenger P" + this.attendee.id);
+                                this.attendee.origin.passenger = null;
+                                this.attendee = null;
+                                
+                                for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
                                     if( isOutOfService(i-1) ){
                                         ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
                                         msg.addReceiver(new AID( company.driverName + i, AID.ISLOCALNAME));
                                         msg.setLanguage("English");
-                                        msg.setOntology("Bigger-Bid");
-                                        msg.setContent( amount + "" );
+                                        msg.setOntology("Decision");
+                                        msg.setContent( "Sorry" );
                                         company.send(msg);
                                         this.answers[i-1] = null;
                                     }else{
                                         this.answers[i-1] = "0";
+                                    }
+                                }
+                                        
+                                        
+                                this.company.state = State.WAITING_FOR_CALLS;
+                            }else{
+                                //Notify Auctioners about biggest Bid
+                                int amount = Integer.parseInt(this.answers[this.maxBidder]);
+
+                                //notify the rest of bidders
+                                for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
+                                    if( this.maxBidder+1 != i ){
+                                        if( isOutOfService(i-1) ){
+                                            ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+                                            msg.addReceiver(new AID( company.driverName + i, AID.ISLOCALNAME));
+                                            msg.setLanguage("English");
+                                            msg.setOntology("Bigger-Bid");
+                                            msg.setContent( amount + "" );
+                                            company.send(msg);
+                                            this.answers[i-1] = null;
+                                        }else{
+                                            this.answers[i-1] = "0";
+                                        }
                                     }
                                 }
                             }
@@ -162,11 +208,10 @@ public class ProcessCallsBehaviour extends Behaviour {
                             m.find();
                             Integer bid = Integer.parseInt(m.group());
                             
-                            if( bid == 0 ){
-                                System.out.println("Driver " + taxiIndex + " can't bid");
-                            }else{
+                            if( bid != 0 ){
                                 System.out.println("Driver " + taxiIndex + " bids " + bid);
                             }
+                            
                             this.answers[taxiIndex-1] = ""+bid;
                         }
                     }

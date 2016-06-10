@@ -15,7 +15,6 @@ import java.util.ArrayList;
  * @author kotaro and Fabio :)
  */
 public class Driver extends Agent {
- 
     public Taxi taxi;
     public City city;
     public int index;
@@ -28,6 +27,7 @@ public class Driver extends Agent {
     public double last_profit = 0;
     public boolean working = false;
     public int cantBidIn = 0;
+    public int bidIncrease = 2;
     
     Behaviour main_behaviour;
     
@@ -48,14 +48,11 @@ public class Driver extends Agent {
     }
     
     public void bid( ACLMessage msg , double bidValue , double maxPayOff , Intersection origin , Intersection destiny ){
-        Request tmp_request = new Request(origin,destiny,0,0,-1);
+        Request tmp_request = new Request(origin,destiny,0,0,0,-1);
         this.bid(msg, bidValue, maxPayOff, tmp_request);
     }
     
-    public void bid( ACLMessage msg , double bidValue , double maxPayOff , Request new_request ){
-        
-        ACLMessage reply = msg.createReply();
-        
+    public int totalRequestTime( Request new_request ){
         //calculate total time of completing my job
         double total_requests_time = 0;
         Request last_request = null;
@@ -98,11 +95,25 @@ public class Driver extends Agent {
         total_requests_time += city.getTotalDistance( new_request.origin , new_request.destiny );
         
         
-        total_requests_time = total_requests_time/this.taxi.speed;
-        System.out.println("Driver " + this.index + ": I will take " + total_requests_time + "s");
+        return (int)(total_requests_time/this.taxi.speed);
+    }
+    
+    
+    public void bid( ACLMessage msg , double bidValue , double maxPayOff , Request new_request ){
+        this.last_profit = maxPayOff;
+        ACLMessage reply = msg.createReply();
+ 
            
         //Can't Bid IF:  
-        if( bidValue >= maxPayOff-1 ){
+        if( !this.timeOfDuty( MainPanel.seconds + this.totalRequestTime(new_request) ) ){
+            // - I'll be out of duty taking that passanger
+            System.out.println("Driver " + this.index + ": I don't have time for that");
+            reply.setContent(this.index + ":0");
+        } else if ( this.cantBidIn != 0 ){
+            // - I won a bid recently 
+            System.out.println("Driver " + this.index + ": I won a bid recently");
+            reply.setContent(this.index + ":0");
+        } else if( bidValue >= maxPayOff-1 ){
             // - My Bid is bigger than my max Profit
             System.out.println("Driver " + this.index + ": the big is too high for me");
             reply.setContent(this.index + ":0");
@@ -110,24 +121,16 @@ public class Driver extends Agent {
             // - I can't get profit from the task
             System.out.println("Driver " + this.index + ": I can't get any profit from that request");
             reply.setContent(this.index + ":0");
-        } else if ( this.cantBidIn != 0 ){
-            // - I won a bid recently 
-            System.out.println("Driver " + this.index + ": I won a bid recently");
-            reply.setContent(this.index + ":0");
-        } else if( !this.timeOfDuty( MainPanel.seconds + (int)(total_requests_time) ) ){
-            // - I'll be out of duty taking that passanger
-            System.out.println("Driver " + this.index + ": I don't have time for that");
-            reply.setContent(this.index + ":0");
-        }else{
-            reply.setContent(this.index + ":" + bidValue);
-            this.last_max_bid = bidValue;
+        } else{
+            reply.setContent(this.index + ":" + (maxPayOff - bidValue) );
+            this.last_max_bid = (maxPayOff - bidValue);
         }
         
         this.send(reply);
     }
     
     private void _wonbid( Request new_req  ){
-        this.cantBidIn = (int)(new_req.origin.distance(new_req.destiny)/this.taxi.speed);
+        this.cantBidIn = (int)(this.city.getTotalDistance(new_req.origin, new_req.destiny)/this.taxi.speed);
         this.requests.add( new_req );
     }
     
@@ -135,8 +138,8 @@ public class Driver extends Agent {
         this._wonbid(new_req);
     }
     
-    public void wonBid( Intersection origin , Intersection destiny , double maxPayOff , double myBid , int passenger_id ){
-        Request new_req = new Request( origin , destiny , maxPayOff , myBid , passenger_id );
+    public void wonBid( Intersection origin , Intersection destiny , double profit , double company_cut, double myBid , int passenger_id ){
+        Request new_req = new Request( origin , destiny , profit , company_cut , myBid , passenger_id );
         this._wonbid(new_req);
     }
     

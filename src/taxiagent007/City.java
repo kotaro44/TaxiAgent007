@@ -32,8 +32,6 @@ public class City extends JPanel {
     private ArrayList<Passenger> passengers = new ArrayList<>();
     public Company company;
     ArrayList<Road> edges;
-    DijkstraAlgorithm dijkstra;
-    Graph graph;
     
     public int totalCalls = 0;
     public int callsHour = 0;
@@ -164,10 +162,6 @@ public class City extends JPanel {
                 this.edges.add(  r );
             }
         }
-        
-        this.graph = new Graph(this.intersections, this.edges);
-        this.dijkstra = new DijkstraAlgorithm(this.graph);
-      
     }
     
     
@@ -204,17 +198,29 @@ public class City extends JPanel {
             this.drawRoad(scaleX(road[0]), scaleY(road[1]), scaleX(road[2]), scaleY(road[3]), g);
         }
         
+ 
+        for( int i = 1 ; i <= 100 ; i+=7 ){
+            if( (i-1)%14 == 0 )
+                g.drawString( (i/7)+"" , scaleX(i) - 5 , scaleY(-3) );
+            g.drawLine(scaleX(i), scaleY(-2) ,scaleX(i), scaleY(-1));
+            if( i <= 50 ){
+                if( (i-1)%14 == 0 )
+                    g.drawString( (i/7)+"" , scaleX(-3) -10 , scaleY(i)+5 );
+                g.drawLine(scaleX(-3), scaleY(i) ,scaleX(-2), scaleY(i));
+            }
+        }
+        
+        
+        
         //draw intersections
         int r = 4;
         for (Intersection intersection : intersections ) {
-            
-            //r = 1*intersection.calls;
-            g.setColor(Color.red);
-            
-            //draw Passenger
-            
-          
             if( intersection.passenger != null ){
+                
+                if( intersection.passenger.taxiId == -1 )
+                    g.setColor(Color.white);
+                else
+                    g.setColor( this.company.taxis.get(intersection.passenger.taxiId).color );
                 
                 g.drawLine(scaleX(intersection.x), scaleY(intersection.y), 
                     scaleX(intersection.passenger.destination.x), scaleY(intersection.passenger.destination.y));
@@ -222,23 +228,14 @@ public class City extends JPanel {
                 g.fillOval(this.scaleX(intersection.passenger.destination.x) - r/2, 
                     scaleY(intersection.passenger.destination.y) - r/2, r, r);
                 
-                g.drawString("P" + intersection.passenger.id, scaleX(intersection.x) + 5, scaleY(intersection.y) + 5 );  
-                
-                g.setColor(Color.yellow);
-            }/*else{
-                g.setColor(Color.blue);
-            }*/
-            
-            /*g.fillOval(scaleX(intersection.x) - r/2,scaleY(intersection.y) - r/2, r, r);
-            
-            r = 1*intersection.drops.size();
-            g.setColor(Color.white);
-            g.fillOval(scaleX(intersection.x) - r/2,scaleY(intersection.y) - r/2, r, r);*/
+                g.drawString("P" + intersection.passenger.id + " (NT$" + intersection.passenger.payment + ")", scaleX(intersection.x) + 5, scaleY(intersection.y) + 5 );  
+     
+            }
         }
         
         //draw Taxi Center
         g.setColor(Color.DARK_GRAY); //taxi center
-        g.fillRect( 22 + scaleX(this.taxi_center[0]) ,  scaleY(this.taxi_center[1]) - 35, 30 , 30 ); 
+        g.drawRect( 23 + scaleX(this.taxi_center[0]) ,  scaleY(this.taxi_center[1]) - 43, 50 , 36 ); 
         
         //draw Taxis
         int tr = 10;
@@ -258,9 +255,25 @@ public class City extends JPanel {
                     }
                     g.setColor(taxi.color);
                     g.fillOval( scaleX(taxi.x) - tr/2, scaleY(taxi.y)- tr/2, tr, tr);
+                    
+                    switch ((taxi.driver.index-1)%4) {
+                        case 0:
+                            g.drawString("D" + taxi.driver.index, scaleX(taxi.x) - tr/2 - 10, scaleY(taxi.y)- tr/2 - 10);
+                            break;
+                        case 1:
+                            g.drawString("D" + taxi.driver.index, scaleX(taxi.x) - tr/2 + 10, scaleY(taxi.y)- tr/2 - 10);
+                            break;
+                        case 2: 
+                            g.drawString("D" + taxi.driver.index, scaleX(taxi.x) - tr/2 + 10, scaleY(taxi.y)- tr/2 + 20);
+                            break;
+                        default:
+                            g.drawString("D" + taxi.driver.index, scaleX(taxi.x) - tr/2 - 10, scaleY(taxi.y)- tr/2 + 20);
+                            break;
+                    }
+                    
                 }else{
                     g.setColor(taxi.color);
-                    g.fillOval( 62 + scaleX(this.taxi_center[0]) - tr/2 + tr*(i%4) , 
+                    g.fillOval( 32 + scaleX(this.taxi_center[0]) - tr/2 + tr*(i%4) , 
                             scaleY(this.taxi_center[1]) - tr/2 - 35 + tr*(i/4) , tr, tr);
                 }
             }
@@ -349,6 +362,7 @@ public class City extends JPanel {
             result = new LinkedList<>();
             result.add(to);
         }else{
+            DijkstraAlgorithm dijkstra = new DijkstraAlgorithm( new Graph(this.intersections, this.edges) );
             dijkstra.execute(from);
             result = dijkstra.getPath(to);
         }
@@ -369,6 +383,16 @@ public class City extends JPanel {
     
     public double getTotalDistance(Intersection origin, Intersection destiny){
         return getTotalDistance( this.getShortestPath(origin, destiny) );
+    }
+    
+    public double getTotalDistance( int x , int y , Intersection destiny){
+        Intersection nearest = this.getNearestIntersection(x,y);
+        return getTotalDistance( this.getShortestPath(nearest, destiny) ) + nearest.distance(x, y);
+    }
+    
+    public double getTotalDistance( double x , double y , Intersection destiny){
+        Intersection nearest = this.getNearestIntersection(x,y);
+        return getTotalDistance( this.getShortestPath(nearest, destiny) ) + nearest.distance(x, y);
     }
     
     public Intersection[] getIntersections() //just in case we need a copy of intersections[]

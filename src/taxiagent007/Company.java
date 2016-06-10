@@ -58,7 +58,6 @@ public class Company extends Agent {
         this.passengers = new ArrayList<>();
         hireTaxiAgents();
         this.mainpanel.setTaxiLabels();
-        
         this.addBehaviour(new ProcessCallsBehaviour(this));
     }
     
