@@ -5,7 +5,9 @@
  */
 package taxiagent007;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.io.File;
@@ -28,7 +30,9 @@ public class City extends JPanel {
     private int margin_y = 40;
     private int h;
     private int w;
-    private Image road_texture;
+    private Image[] textures;
+    private String[] textures_path = {"road.jpg","roof1.jpg",
+        "roof2.jpg","grass.jpg","roof3.jpg"};
     private ArrayList<Passenger> passengers = new ArrayList<>();
     public Company company;
     ArrayList<Road> edges;
@@ -120,10 +124,26 @@ public class City extends JPanel {
         {50,29,40,20,21}//41
     };
     
+    private int[][] buildings = {{2,2,5,8,0},
+                                 {2,37,5,8,3},
+                                 {88,2,5,8,0},
+                                 {88,37,5,8,0},
+                                {59,37,19,8,1},
+                                {59,2,19,8,1},
+                                {17,37,5,8,3},
+                                {30,37,5,8,0},
+                                {17,2,19,8,1}}; 
+    
+    private static Font monoFont = new Font("Monospaced", Font.BOLD , 18);
+    
     public City(){
         try {
-            File pathToFile = new File("road.jpg");
-            road_texture = ImageIO.read(pathToFile);
+            File pathToFile;
+            this.textures = new Image[this.textures_path.length];
+            for( int i = 0 ; i < this.textures_path.length ; i++ ){
+                pathToFile = new File(this.textures_path[i]);
+                this.textures[i] = ImageIO.read(pathToFile);
+            }
             this.generateCity();
             
         } catch (IOException ex) {
@@ -171,12 +191,12 @@ public class City extends JPanel {
         if( x1 != x2 ){
             int m = ((y2-y1)/(x2-x1));
             for( int i = x1 ; i <= x2 ; i+= img_size ){
-                g.fillRect( i - m2 , 
-                    (m*(i-m2)+(y1-m*x1))-m2,img_size,img_size);
+                g.drawImage(textures[0],i - m2 , 
+                    (m*(i-m2)+(y1-m*x1))-m2,img_size,img_size,null,null);
             }
         }else{
             for( int i = y1 ; i <= y2 ; i+= img_size ){
-                g.fillRect( x1- m2 , i - m2,img_size,img_size);
+                g.drawImage(textures[0], x1- m2 , i - m2,img_size,img_size,null,null);
             }
         }
     }
@@ -189,9 +209,11 @@ public class City extends JPanel {
     public void paint(Graphics g){
         if( company == null )
             return;
+       
         g.clearRect(0, 0, width, height);
+        g.drawImage(textures[3], 0 , 0,width,height,null,null);
+        g.setFont(monoFont);
         
-        g.setColor(Color.GRAY);
         
         //draw roads
         for (int[] road : roads) {
@@ -199,12 +221,13 @@ public class City extends JPanel {
         }
         
  
+        g.setColor(Color.white);
         for( int i = 1 ; i <= 100 ; i+=7 ){
-            if( (i-1)%14 == 0 )
-                g.drawString( (i/7)+"" , scaleX(i) - 5 , scaleY(-3) );
+            if( (i-1)%14 != 0 )
+                g.drawString( (i/7)+"" , scaleX(i) - 5 , scaleY(-2) );
             g.drawLine(scaleX(i), scaleY(-2) ,scaleX(i), scaleY(-1));
             if( i <= 50 ){
-                if( (i-1)%14 == 0 )
+                if( (i-1)%14 != 0 )
                     g.drawString( (i/7)+"" , scaleX(-3) -10 , scaleY(i)+5 );
                 g.drawLine(scaleX(-3), scaleY(i) ,scaleX(-2), scaleY(i));
             }
@@ -235,7 +258,7 @@ public class City extends JPanel {
         
         //draw Taxi Center
         g.setColor(Color.DARK_GRAY); //taxi center
-        g.drawRect( 23 + scaleX(this.taxi_center[0]) ,  scaleY(this.taxi_center[1]) - 43, 50 , 36 ); 
+        g.fillRect( 23 + scaleX(this.taxi_center[0]) ,  scaleY(this.taxi_center[1]) - 43, 50 , 36 ); 
         
         //draw Taxis
         int tr = 10;
@@ -277,6 +300,11 @@ public class City extends JPanel {
                             scaleY(this.taxi_center[1]) - tr/2 - 35 + tr*(i/4) , tr, tr);
                 }
             }
+        }
+        
+        //draw buildings
+        for( int[] building : this.buildings ){
+            g.drawImage(textures[building[4]+1], scaleX(building[0]) , scaleY(building[1]) ,scaleX(building[2]),scaleY(building[3]),null,null);
         }
 
     }

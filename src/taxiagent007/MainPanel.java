@@ -516,7 +516,7 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         this.update();
-        this.city.paint(this.city.getGraphics());
+        this.city.repaint();
     }
     
     private void initAnimation(){
@@ -524,12 +524,6 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
         city_timer = new Timer(this.anim_slider.getValue(), this);
         city_timer.start();
     }
-    
-    private void console_log( String text ){
-        this.text2write = text;
-        this.characters = 0;
-    }
-    
     
     /**
      * @param args the command line arguments
