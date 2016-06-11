@@ -9,6 +9,8 @@ import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -99,11 +101,16 @@ public class Driver extends Agent {
     }
     
     
-    public void bid( ACLMessage msg , double bidValue , double maxPayOff , Request new_request ){
+    public void bid( ACLMessage msg , double bidValue , double maxPayOff , Request new_request ) {
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Driver.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         this.last_profit = maxPayOff;
         ACLMessage reply = msg.createReply();
  
-           
         //Can't Bid IF:  
         if( !this.timeOfDuty( MainPanel.seconds + this.totalRequestTime(new_request) ) ){
             // - I'll be out of duty taking that passanger
@@ -213,6 +220,7 @@ public class Driver extends Agent {
         this.taxi.driver = this;
         this.requests = new ArrayList<>();
         this.state = State.OUT_OF_SERVICE;
+        bidIncrease = (int)Math.floor(  Math.random()*5 )+1;
         System.out.println("Driver" + index + " is ready!");
     }
         

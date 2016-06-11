@@ -210,17 +210,22 @@ public class City extends JPanel {
         if( company == null )
             return;
        
+        //draw floor
         g.clearRect(0, 0, width, height);
         g.drawImage(textures[3], 0 , 0,width,height,null,null);
         g.setFont(monoFont);
-        
         
         //draw roads
         for (int[] road : roads) {
             this.drawRoad(scaleX(road[0]), scaleY(road[1]), scaleX(road[2]), scaleY(road[3]), g);
         }
         
- 
+        //draw buildings
+        for( int[] building : this.buildings ){
+            g.drawImage(textures[building[4]+1], scaleX(building[0]) , scaleY(building[1]) ,scaleX(building[2]),scaleY(building[3]),null,null);
+        }
+        
+        //draw ruler
         g.setColor(Color.white);
         for( int i = 1 ; i <= 100 ; i+=7 ){
             if( (i-1)%14 != 0 )
@@ -233,9 +238,7 @@ public class City extends JPanel {
             }
         }
         
-        
-        
-        //draw intersections
+        //draw passengers
         int r = 4;
         for (Intersection intersection : intersections ) {
             if( intersection.passenger != null ){
@@ -251,14 +254,15 @@ public class City extends JPanel {
                 g.fillOval(this.scaleX(intersection.passenger.destination.x) - r/2, 
                     scaleY(intersection.passenger.destination.y) - r/2, r, r);
                 
-                g.drawString("P" + intersection.passenger.id + " (NT$" + intersection.passenger.payment + ")", scaleX(intersection.x) + 5, scaleY(intersection.y) + 5 );  
-     
+                g.drawString("P" + intersection.passenger.id , scaleX(intersection.x) + 5, scaleY(intersection.y) + 20 );  
             }
         }
         
         //draw Taxi Center
-        g.setColor(Color.DARK_GRAY); //taxi center
+        g.setColor(Color.GRAY); 
         g.fillRect( 23 + scaleX(this.taxi_center[0]) ,  scaleY(this.taxi_center[1]) - 43, 50 , 36 ); 
+        g.setColor(Color.BLACK);
+        g.drawRect( 23 + scaleX(this.taxi_center[0]) ,  scaleY(this.taxi_center[1]) - 43, 50 , 36 ); 
         
         //draw Taxis
         int tr = 10;
@@ -266,35 +270,44 @@ public class City extends JPanel {
             Taxi taxi = this.company.taxis.get(i);
             
             if( taxi != null ){
+                //Taxi is working
                 if( taxi.driver.state != State.OUT_OF_SERVICE ){
+                    
+                    //taxi with passenger
                     if( taxi.passenger != null ){
+                        //draw passenger
                         g.setColor(Color.WHITE);
                         tr += 5;
                         g.fillOval( scaleX(taxi.x) - tr/2, scaleY(taxi.y)- tr/2, tr, tr);
                         tr -= 5;
                         g.setColor(taxi.color);
+                        //passenger destination
                         g.drawString("X", scaleX(taxi.passenger.destination.x) - 5, scaleY(taxi.passenger.destination.y) + 5 ); 
                         
                     }
+                    
+                    //draw Taxi
                     g.setColor(taxi.color);
                     g.fillOval( scaleX(taxi.x) - tr/2, scaleY(taxi.y)- tr/2, tr, tr);
                     
+                    //draw taxi name
                     switch ((taxi.driver.index-1)%4) {
                         case 0:
-                            g.drawString("D" + taxi.driver.index, scaleX(taxi.x) - tr/2 - 10, scaleY(taxi.y)- tr/2 - 10);
+                            g.drawString("D" + taxi.driver.index, scaleX(taxi.x) - tr/2 - 20, scaleY(taxi.y)- tr/2 - 10);
                             break;
                         case 1:
                             g.drawString("D" + taxi.driver.index, scaleX(taxi.x) - tr/2 + 10, scaleY(taxi.y)- tr/2 - 10);
                             break;
                         case 2: 
-                            g.drawString("D" + taxi.driver.index, scaleX(taxi.x) - tr/2 + 10, scaleY(taxi.y)- tr/2 + 20);
+                            g.drawString("D" + taxi.driver.index, scaleX(taxi.x) - tr/2 + 10, scaleY(taxi.y)- tr/2 + 25);
                             break;
                         default:
-                            g.drawString("D" + taxi.driver.index, scaleX(taxi.x) - tr/2 - 10, scaleY(taxi.y)- tr/2 + 20);
+                            g.drawString("D" + taxi.driver.index, scaleX(taxi.x) - tr/2 - 20, scaleY(taxi.y)- tr/2 + 25);
                             break;
                     }
                     
                 }else{
+                    //draw taxi inside company
                     g.setColor(taxi.color);
                     g.fillOval( 32 + scaleX(this.taxi_center[0]) - tr/2 + tr*(i%4) , 
                             scaleY(this.taxi_center[1]) - tr/2 - 35 + tr*(i/4) , tr, tr);
@@ -302,10 +315,7 @@ public class City extends JPanel {
             }
         }
         
-        //draw buildings
-        for( int[] building : this.buildings ){
-            g.drawImage(textures[building[4]+1], scaleX(building[0]) , scaleY(building[1]) ,scaleX(building[2]),scaleY(building[3]),null,null);
-        }
+        
 
     }
     
@@ -334,7 +344,7 @@ public class City extends JPanel {
     }
     
     public void updateCity(){
-        int actual = MainPanel.seconds;
+        int actual = MainPanel.total_seconds;
         int elapsed = actual - last ;
         
         if( elapsed >= 0 ){

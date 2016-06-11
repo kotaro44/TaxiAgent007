@@ -34,20 +34,20 @@ public class Company extends Agent {
     public String driverName = "TaxiDriver";
     public int profit = 0;
     public Object[][] taxi_props = 
-                             {{57,29,Color.ORANGE,Shift.FROM_3AM_TO_1PM},
-                             {57,29,Color.BLACK,Shift.FROM_3AM_TO_1PM},
-                             {57,29,Color.BLUE,Shift.FROM_3AM_TO_1PM},
+                             {{57,29,Color.BLACK,Shift.FROM_3AM_TO_1PM},
+                             {57,29,new Color(242,204,107),Shift.FROM_3AM_TO_1PM},
+                             {57,29,new Color(242,107,154),Shift.FROM_3AM_TO_1PM},
                              {57,29,Color.GREEN,Shift.FROM_3AM_TO_1PM},
                              
-                             {57,29,Color.MAGENTA,Shift.FROM_6PM_TO_4AM},
+                             {57,29,new Color(45,99,144),Shift.FROM_6PM_TO_4AM},
                              {57,29,Color.DARK_GRAY,Shift.FROM_6PM_TO_4AM},
-                             {57,29,Color.YELLOW,Shift.FROM_6PM_TO_4AM},
+                             {57,29,new Color(171,171,81),Shift.FROM_6PM_TO_4AM},
                              {57,29,Color.RED,Shift.FROM_6PM_TO_4AM},
                              
-                             {57,29,Color.orange,Shift.FROM_9AM_TO_7PM},
-                             {57,29,Color.PINK,Shift.FROM_9AM_TO_7PM},
-                             {57,29,Color.LIGHT_GRAY,Shift.FROM_9AM_TO_7PM},
-                             {57,29,Color.cyan,Shift.FROM_9AM_TO_7PM}};
+                             {57,29,new Color(91,170,84),Shift.FROM_9AM_TO_7PM},
+                             {57,29,new Color(144,49,49),Shift.FROM_9AM_TO_7PM},
+                             {57,29,Color.MAGENTA,Shift.FROM_9AM_TO_7PM},
+                             {57,29,Color.BLUE,Shift.FROM_9AM_TO_7PM}};
     
     public double charge_rate_km = 40.0/7.0;
     public double gas_cost_km = 6.0/7.0;
@@ -79,7 +79,7 @@ public class Company extends Agent {
                 
                 //delay propositado para os agents nao acessarem this.taxis ao mesmo tempo
                 try {
-                    Thread.sleep(1000);                 //1000 milliseconds is one second.
+                    Thread.sleep(500);                 //1000 milliseconds is one second.
                     } catch(InterruptedException ex) {
                         Thread.currentThread().interrupt();
                     }

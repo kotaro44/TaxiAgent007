@@ -122,7 +122,7 @@ public class ProcessCallsBehaviour extends Behaviour {
                         this.maxBidder = this.getMaxBidder();
                         if( this.noMoreBids() ){
                             //Finish Auction
-                            System.out.println("Driver " + (this.maxBidder+1) + " bids " + this.answers[this.maxBidder] + "!");
+                           
                             System.out.println("Give request to: " + (this.maxBidder+1) );
                             System.out.println("--------------------------------------------------");
                             
@@ -176,7 +176,8 @@ public class ProcessCallsBehaviour extends Behaviour {
                             }else{
                                 //Notify Auctioners about biggest Bid
                                 int amount = Integer.parseInt(this.answers[this.maxBidder]);
-
+                                
+                                
                                 //notify the rest of bidders
                                 for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
                                     if( this.maxBidder+1 != i ){
