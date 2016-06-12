@@ -9,6 +9,8 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +26,8 @@ public class ProcessCallsBehaviour extends Behaviour {
     
     public String[] answers;
     public boolean[] participating;
+    public int lastBid = 0;
+    public ArrayList<Integer> bid_stack = new ArrayList<>();
 
     public ProcessCallsBehaviour(Company company){
         this.company = company;
@@ -38,6 +42,10 @@ public class ProcessCallsBehaviour extends Behaviour {
         this.company.state = State.WAITING_FOR_BIDS;
         System.out.println("--------------------------------------------------");
         System.out.println("Company: Bididng Passenger " + this.attendee.id + "!!" );
+        
+        this.lastBid = 0;
+        while( !bid_stack.isEmpty() )
+            bid_stack.remove(bid_stack.size()-1);
         
         //send message to all Taxis that are in service'
         for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){ 
@@ -250,7 +258,15 @@ public class ProcessCallsBehaviour extends Behaviour {
         System.out.println("Give request to: " + (this.maxBidder+1) );
         System.out.println("--------------------------------------------------");
         
-        int amount = this.getSecondLowestBid();
+        Collections.sort(bid_stack);
+        int amount = bid_stack.remove(bid_stack.size()-1);
+        int possible = amount;
+        while( !bid_stack.isEmpty() && possible == amount ){
+            possible = bid_stack.remove(bid_stack.size()-1);
+        }
+        if( possible != amount )
+            amount = possible;
+
 
         this.attendee.taxiId = this.maxBidder;
         //notify the rest of bidders
@@ -264,7 +280,7 @@ public class ProcessCallsBehaviour extends Behaviour {
                 if( this.maxBidder+1 != i ){
                     msg.setContent( "Sorry" );
                 }else{
-                    msg.setContent( "GO-" + amount );
+                    msg.setContent( "GO-" + amount);
                 }
 
                 company.send(msg);
@@ -303,6 +319,7 @@ public class ProcessCallsBehaviour extends Behaviour {
     public void notifyBiggestBid(){
         //Notify Auctioners about biggest Bid
         int amount = Integer.parseInt(this.answers[this.maxBidder]);
+        this.lastBid = amount;
 
         //notify the rest of bidders
         for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
@@ -334,6 +351,7 @@ public class ProcessCallsBehaviour extends Behaviour {
             Integer bid = Integer.parseInt(m.group());
 
             if( bid != 0 ){
+                bid_stack.add(bid);
                 System.out.println("Driver " + taxiIndex + " bids " + bid);
             }
 

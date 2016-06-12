@@ -125,7 +125,10 @@ public class Driver extends Agent {
             
             if( bidValue >= maxPayOff-1 ){
                 // - My Bid is bigger than my max Profit
-                System.out.println("Driver " + this.index + ": the bid is too low for me");
+                if( Company.Vickrey )
+                    System.out.println("Driver " + this.index + ": the bid is too high for me");
+                else
+                    System.out.println("Driver " + this.index + ": the bid is too low for me");
                 reply.setContent(this.index + ":0");
             } else if ( maxPayOff <= 0 ){
                 // - I can't get profit from the task
