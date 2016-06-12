@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
 public class SilentBidBehaviour extends Behaviour {
 
     Driver driver;
-    public boolean silent_biding = false;
     public boolean stop = false;
     public Request possible_request;
     public double maxPayOff;
@@ -26,6 +25,7 @@ public class SilentBidBehaviour extends Behaviour {
     public SilentBidBehaviour(Driver driver){
         this.driver = driver;
         this.myBid = this.driver.bidIncrease;
+        this.driver.silent_biding = false;
     }
     
     public void stop(){
@@ -40,6 +40,7 @@ public class SilentBidBehaviour extends Behaviour {
         
         driver.actual_request = null;
         driver.taxi.passenger = null;
+        this.driver.silent_biding = false;
         this.driver.removeBehaviour(this);
     }
     
@@ -47,7 +48,7 @@ public class SilentBidBehaviour extends Behaviour {
     
     @Override
     public void action() {
-        if( !silent_biding ){
+        if( !this.driver.silent_biding ){
             ACLMessage msg = this.myAgent.receive();
             if( msg != null ){
                 String passenger = msg.getContent();
@@ -57,7 +58,13 @@ public class SilentBidBehaviour extends Behaviour {
                 Matcher m = p.matcher(passenger);
 
                 m.find();
-                Intersection origin = driver.city.getNearestIntersection(m.group());
+                Intersection origin;
+                try{
+                    origin = driver.city.getNearestIntersection(m.group());
+                }catch(Exception ex){
+                    System.out.println(">>>>>>>>>>" + this.driver.state.toString());
+                    throw ex;
+                }
 
                 m.find();
                 Intersection destination = driver.city.getNearestIntersection(m.group());
@@ -77,7 +84,7 @@ public class SilentBidBehaviour extends Behaviour {
                 
                 this.driver.bid(msg, myBid, maxPayOff,this.possible_request);
           
-                silent_biding = true;
+                this.driver.silent_biding = true;
             }else{
                 if( this.stop )
                         this.finish();
@@ -86,27 +93,62 @@ public class SilentBidBehaviour extends Behaviour {
             ACLMessage msg = this.myAgent.receive();
             if ( msg != null  ) {
                 String company_decision = msg.getContent();
-                if( company_decision.compareTo("GO") == 0 ){
-                    //WE WON
-                    this.driver.wonBid( possible_request );
-                    silent_biding = false;
-                    this.myBid = 1;
-                    if( this.stop )
-                        this.finish();
-                } else if( company_decision.compareTo("Sorry") == 0 ){
+                
+                if( company_decision.compareTo("Sorry") == 0 ){
                     //WE LOOSE
                     possible_request = null;
-                    silent_biding = false;
+                    this.driver.silent_biding = false;
                     this.myBid = this.driver.bidIncrease;
                     if( this.stop )
                         this.finish();
                 } else{
-                    //CAN CONTINUE BIDDING
-                    do{
-                        this.myBid += this.driver.bidIncrease;
-                    } while( (maxPayOff - this.myBid) >= Integer.parseInt(company_decision));
-                    this.possible_request.company_bid = this.myBid;
-                    this.driver.bid(msg,myBid, maxPayOff,this.possible_request);
+               
+                    if( Company.Vickrey ){
+                        
+                        Pattern p = Pattern.compile("-\\d+");
+                        Matcher m = p.matcher(company_decision);
+                        
+                        if( m.find() ){
+                            //WE WON
+                            this.possible_request.company_bid = Integer.parseInt(m.group())*-1;
+                            System.out.println("Second lowest Bid: " + this.possible_request.company_bid);
+                            this.driver.wonBid( possible_request );
+                            this.driver.silent_biding = false;
+                            this.myBid = 1;
+                            if( this.stop )
+                                this.finish();
+                        } else{
+                            //CAN CONTINUE BIDDING
+                            
+                            do{
+                                this.myBid += this.driver.bidIncrease;
+                            } while(  this.myBid <= Integer.parseInt(company_decision));
+                            
+                            this.possible_request.company_bid = this.myBid;
+                            this.driver.bid(msg,myBid, maxPayOff,this.possible_request);
+                        }
+                        
+                    }else{
+                    
+                        if( company_decision.compareTo("GO") == 0 ){
+                            //WE WON
+                            this.driver.wonBid( possible_request );
+                            this.driver.silent_biding = false;
+                            this.myBid = 1;
+                            if( this.stop )
+                                this.finish();
+                        } else{
+                            //CAN CONTINUE BIDDING
+                           
+                            do{
+                                this.myBid += this.driver.bidIncrease;
+                            } while( (maxPayOff - this.myBid) <= Integer.parseInt(company_decision));
+                            
+                            this.possible_request.company_bid = this.myBid;
+                            this.driver.bid(msg,myBid, maxPayOff,this.possible_request);
+                        }
+                    
+                    }
                 }
             }
         }

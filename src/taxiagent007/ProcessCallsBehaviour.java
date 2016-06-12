@@ -23,11 +23,13 @@ public class ProcessCallsBehaviour extends Behaviour {
     public int maxBidder = -1;
     
     public String[] answers;
+    public boolean[] participating;
 
     public ProcessCallsBehaviour(Company company){
         this.company = company;
         this.company.state = State.WAITING_FOR_CALLS;
         this.answers = new String[this.company.taxi_props.length];
+        this.participating = new boolean[this.company.taxi_props.length];
         
         this.company.state = State.WAITING_FOR_CALLS;
     }
@@ -38,8 +40,9 @@ public class ProcessCallsBehaviour extends Behaviour {
         System.out.println("Company: Bididng Passenger " + this.attendee.id + "!!" );
         
         //send message to all Taxis that are in service'
-        for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
-            if( isOutOfService(i-1) ){
+        for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){ 
+            if( isWaitingForCall(i-1) ){
+                this.participating[i-1] = true;
                 ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
                 msg.addReceiver(new AID( company.driverName + i, AID.ISLOCALNAME));
                 msg.setLanguage("English");
@@ -48,17 +51,25 @@ public class ProcessCallsBehaviour extends Behaviour {
                 company.send(msg);
                 this.answers[i-1] = null;
             }else{
+                this.participating[i-1] = false;
                 this.answers[i-1] = "0";
             }
         }
     }
     
     public boolean gotAllBids(){
-        for( Object answer : this.answers ){
-            if( answer == null ){
+        /*for( int i = 0 ; i <  this.answers.length ; i++ ){
+            if( this.answers[i] == null && isOutOfService( i , true ) ){
+                this.answers[i] = "0";
+            }
+        }*/
+        
+        for( int i = 0 ; i <  this.answers.length ; i++ ){
+            if( this.answers[i] == null ){
                 return false;
             }
         }
+        
         return true;
     }
     
@@ -74,17 +85,54 @@ public class ProcessCallsBehaviour extends Behaviour {
             }
         }
         
-        for( int i = 1 ; i < answers.length ; i++ ){
+        for( int i = 0 ; i < answers.length ; i++ ){
             int bid = Integer.parseInt(this.answers[i]);
-            if(bid != 0 &&  bid < max ){
-                max = Integer.parseInt(this.answers[i]);
-                index = i;
+            
+            if( Company.Vickrey ){
+                if(bid != 0 &&  bid > max ){
+                    max = Integer.parseInt(this.answers[i]);
+                    index = i;
+                }
+            }else{
+                if(bid != 0 &&  bid < max ){
+                    max = Integer.parseInt(this.answers[i]);
+                    index = i;
+                }
             }
         }
         return index;
     }
     
-    public boolean noMoreBids(){
+    public int getSecondLowestBid(){
+        int max_index = this.getMaxBidder();
+        int winning_bid = Integer.parseInt( this.answers[ max_index ] );
+        
+        int max = 0;
+        int index = -1;
+        
+        for( int i = 0 ; i < this.answers.length ; i++ ){
+            max = Integer.parseInt(this.answers[i]);
+            if( max != 0 && i != max_index && max != winning_bid ){
+                index = i;
+                i = this.answers.length;
+            }
+        }
+        
+        for( int i = 0 ; i < answers.length ; i++ ){
+            int bid = Integer.parseInt(this.answers[i]);
+            if(bid != 0 &&  bid > max && i != max_index && bid != winning_bid ){
+                max = Integer.parseInt(this.answers[i]);
+                index = i;
+            }
+        }
+        
+        if( index != -1 )
+            winning_bid = Integer.parseInt( this.answers[ index ] );
+                
+        return winning_bid;
+    }
+    
+    public boolean thereIsWinner(){
         int amount_bidders = 0;
         for ( String answer : answers ) {
             if (  Integer.parseInt(answer) != 0 ) {
@@ -120,110 +168,203 @@ public class ProcessCallsBehaviour extends Behaviour {
                     if( gotAllBids() ){
                         //Got all responses
                         this.maxBidder = this.getMaxBidder();
-                        if( this.noMoreBids() ){
-                            //Finish Auction
-                           
-                            System.out.println("Give request to: " + (this.maxBidder+1) );
-                            System.out.println("--------------------------------------------------");
+                        if( Company.Vickrey ){
+                            //*******VICKREY AUCTION**********
                             
-                            this.attendee.taxiId = this.maxBidder;
-                            //notify the rest of bidders
-                            for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
-                                if( isOutOfService(i-1) ){
-                                    ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-                                    msg.addReceiver(new AID( company.driverName + i, AID.ISLOCALNAME));
-                                    msg.setLanguage("English");
-                                    msg.setOntology("Decision");
+                            //if nobody can take the passenger
+                            /*if( this.nobodyCan() ){
+                                this.rejectCostumer();
+                            }else{
+                                this.notifyVickreyBiggestBid();
+                            }*/
+                            
+                            if( this.thereIsWinner() ){
+                                //Finish Auction   
+                                this.notifyVickreyBiggestBid();
 
-                                    if( this.maxBidder+1 != i ){
-                                        msg.setContent( "Sorry" );
-                                    }else{
-                                        msg.setContent( "GO" );
-                                    }
-
-                                    company.send(msg);
-                                    this.answers[i-1] = null;
+                            }else{
+                                //if nobody can take the passenger
+                                if( this.nobodyCan() ){
+                                    this.rejectCostumer();
                                 }else{
-                                    this.answers[i-1] = "0";
+                                    this.notifyBiggestBid();
                                 }
                             }
                             
-                            this.company.state = State.WAITING_FOR_CALLS;
                             
                         }else{
-                            //if nobody can take the passenger
-                            if( this.nobodyCan() ){
-                                System.out.println("Company: I'm so sorry but nobody can take passenger P" + this.attendee.id);
-                                this.attendee.origin.passenger = null;
-                                this.attendee = null;
-                                
-                                for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
-                                    if( isOutOfService(i-1) ){
-                                        ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-                                        msg.addReceiver(new AID( company.driverName + i, AID.ISLOCALNAME));
-                                        msg.setLanguage("English");
-                                        msg.setOntology("Decision");
-                                        msg.setContent( "Sorry" );
-                                        company.send(msg);
-                                        this.answers[i-1] = null;
-                                    }else{
-                                        this.answers[i-1] = "0";
-                                    }
-                                }
-                                        
-                                        
-                                this.company.state = State.WAITING_FOR_CALLS;
+                            //******LOWEST BID AUCTION********
+
+                            if( this.thereIsWinner() ){
+                                //Finish Auction   
+                                this.notifyWinner();
+
                             }else{
-                                //Notify Auctioners about biggest Bid
-                                int amount = Integer.parseInt(this.answers[this.maxBidder]);
-                                
-                                
-                                //notify the rest of bidders
-                                for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
-                                    if( this.maxBidder+1 != i ){
-                                        if( isOutOfService(i-1) ){
-                                            ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-                                            msg.addReceiver(new AID( company.driverName + i, AID.ISLOCALNAME));
-                                            msg.setLanguage("English");
-                                            msg.setOntology("Bigger-Bid");
-                                            msg.setContent( amount + "" );
-                                            company.send(msg);
-                                            this.answers[i-1] = null;
-                                        }else{
-                                            this.answers[i-1] = "0";
-                                        }
-                                    }
+                                //if nobody can take the passenger
+                                if( this.nobodyCan() ){
+                                    this.rejectCostumer();
+                                }else{
+                                    this.notifyBiggestBid();
                                 }
                             }
                         }
                         
                     }else{
                         //Received a BID
-                        ACLMessage msg = this.myAgent.receive();
-                        if ( msg != null ){
-                            Pattern p = Pattern.compile("\\d+");
-                            Matcher m = p.matcher(msg.getContent());
-
-                            m.find();
-                            Integer taxiIndex = Integer.parseInt(m.group());
-                            m.find();
-                            Integer bid = Integer.parseInt(m.group());
-                            
-                            if( bid != 0 ){
-                                System.out.println("Driver " + taxiIndex + " bids " + bid);
-                            }
-                            
-                            this.answers[taxiIndex-1] = ""+bid;
-                        }
+                        this.checkForBid();
                     }
                 break;
                 
         }
     }
+    public void notifyWinner(){
+        System.out.println("Give request to: " + (this.maxBidder+1) );
+        System.out.println("--------------------------------------------------");
+        
+        this.attendee.taxiId = this.maxBidder;
+        //notify the rest of bidders
+        for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
+            if( isWatingForDecisionOrBid(i-1) ){
+                ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+                msg.addReceiver(new AID( company.driverName + i, AID.ISLOCALNAME));
+                msg.setLanguage("English");
+                msg.setOntology("Decision");
 
-    public boolean isOutOfService( int i ){
-        Driver driver = this.company.taxis.get(i).driver; 
-        return driver.state != State.OUT_OF_SERVICE && driver.state != State.GOING_HOME;
+                if( this.maxBidder+1 != i ){
+                    msg.setContent( "Sorry" );
+                }else{
+                    msg.setContent( "GO");
+                }
+
+                company.send(msg);
+                this.answers[i-1] = null;
+            }else{
+                this.answers[i-1] = "0";
+            }
+        }
+
+        this.company.state = State.WAITING_FOR_CALLS;
+    }
+    
+    public void notifyVickreyBiggestBid(){
+        System.out.println("Give request to: " + (this.maxBidder+1) );
+        System.out.println("--------------------------------------------------");
+        
+        int amount = this.getSecondLowestBid();
+
+        this.attendee.taxiId = this.maxBidder;
+        //notify the rest of bidders
+        for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
+            if( isWatingForDecisionOrBid(i-1) ){
+                ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+                msg.addReceiver(new AID( company.driverName + i, AID.ISLOCALNAME));
+                msg.setLanguage("English");
+                msg.setOntology("Decision");
+
+                if( this.maxBidder+1 != i ){
+                    msg.setContent( "Sorry" );
+                }else{
+                    msg.setContent( "GO-" + amount );
+                }
+
+                company.send(msg);
+                this.answers[i-1] = null;
+            }else{
+                this.answers[i-1] = "0";
+            }
+        }
+
+        this.company.state = State.WAITING_FOR_CALLS;
+    }
+    
+   
+    public void rejectCostumer(){
+        System.out.println("Company: I'm so sorry but nobody can take passenger P" + this.attendee.id);
+        this.attendee.origin.passenger = null;
+        this.attendee = null;
+
+        for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
+            if( isWatingForDecisionOrBid(i-1) ){
+                ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+                msg.addReceiver(new AID( company.driverName + i, AID.ISLOCALNAME));
+                msg.setLanguage("English");
+                msg.setOntology("Decision");
+                msg.setContent( "Sorry" );
+                company.send(msg);
+                this.answers[i-1] = null;
+            }else{
+                this.answers[i-1] = "0";
+            }
+        }
+
+        this.company.state = State.WAITING_FOR_CALLS;
+    }
+    
+    public void notifyBiggestBid(){
+        //Notify Auctioners about biggest Bid
+        int amount = Integer.parseInt(this.answers[this.maxBidder]);
+
+        //notify the rest of bidders
+        for( int i = 1 ; i <= this.company.taxi_props.length ; i++ ){
+            if( this.maxBidder+1 != i ){
+                if( isWatingForDecisionOrBid(i-1) ){
+                    ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+                    msg.addReceiver(new AID( company.driverName + i, AID.ISLOCALNAME));
+                    msg.setLanguage("English");
+                    msg.setOntology("Bigger-Bid");
+                    msg.setContent( amount + "" );
+                    company.send(msg);
+                    this.answers[i-1] = null;
+                }else{
+                    this.answers[i-1] = "0";
+                }
+            }
+        }
+    }
+    
+    public void checkForBid(){
+        ACLMessage msg = this.myAgent.receive();
+        if ( msg != null ){
+            Pattern p = Pattern.compile("\\d+");
+            Matcher m = p.matcher(msg.getContent());
+
+            m.find();
+            Integer taxiIndex = Integer.parseInt(m.group());
+            m.find();
+            Integer bid = Integer.parseInt(m.group());
+
+            if( bid != 0 ){
+                System.out.println("Driver " + taxiIndex + " bids " + bid);
+            }
+
+            this.answers[taxiIndex-1] = ""+bid;
+        }
+    }
+    
+    public boolean isOutOfService( Driver driver ){
+        return driver.state == State.OUT_OF_SERVICE || driver.state == State.GOING_HOME;
+    }
+    
+    public boolean isWaitingForCall( int i ){
+        Driver driver = this.company.taxis.get(i).driver;
+        if( driver.state == State.WAITING_FOR_COMPANY  )
+            return true;
+        if( !isOutOfService(driver) && !driver.silent_biding )
+            return true;
+        return false;
+    }
+    
+    public boolean isWatingForDecisionOrBid( int i ){//true
+        Driver driver = this.company.taxis.get(i).driver;
+      
+        if( driver.silent_biding )
+            return true;
+        if( driver.state == State.WAITING_FOR_COMPANY  )
+            return false;
+        if( isOutOfService(driver) )
+            return false;
+        
+        return this.participating[i];
     }
     
     @Override

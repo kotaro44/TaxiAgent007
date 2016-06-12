@@ -7,6 +7,8 @@ package taxiagent007;
 
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -57,19 +59,44 @@ public class BidBehaviour extends Behaviour {
                     this.msg = new_msg;
                     String company_decision = this.msg.getContent();
         
-                    if( company_decision.compareTo("GO") == 0 ){
-                        this.driver.state = State.WON_BID_RESTING;
-                        this.driver.wonBid( this.possible_request );
-                        this.driver.removeBehaviour(this);
-                    } else if( company_decision.compareTo("Sorry") == 0 ){
+                    
+                    if( company_decision.compareTo("Sorry") == 0 ){
                         possible_request = null;
                         this.driver.state = State.WAITING_FOR_COMPANY;
                         this.driver.removeBehaviour(this);
-                    } else{
-                        do{
-                            this.myBid += this.driver.bidIncrease;
-                        } while( (maxPayOff - this.myBid) >= Integer.parseInt(company_decision));
-                        this.driver.state = State.BIDDING_FOR_PASSENGER;
+                    } else {
+                        
+                        if( Company.Vickrey ){
+                            
+                            Pattern p = Pattern.compile("-\\d+");
+                            Matcher m = p.matcher(company_decision);
+
+                            if( m.find() ){
+                                this.driver.state = State.WON_BID_RESTING;
+                                this.possible_request.company_bid = Integer.parseInt(m.group())*-1;
+                                System.out.println("Second lowest Bid: " + this.possible_request.company_bid);
+                                this.driver.wonBid( this.possible_request );
+                                this.driver.removeBehaviour(this);
+                            } else{
+                                do{
+                                    this.myBid += this.driver.bidIncrease;
+                                } while( this.myBid <= Integer.parseInt(company_decision));
+                                this.driver.state = State.BIDDING_FOR_PASSENGER;
+                            }
+                        }else{
+                       
+                            if( company_decision.compareTo("GO") == 0 ){
+                                this.driver.state = State.WON_BID_RESTING;
+                                this.driver.wonBid( this.possible_request );
+                                this.driver.removeBehaviour(this);
+                            } else{
+                                do{
+                                    this.myBid += this.driver.bidIncrease;
+                                } while( (maxPayOff - this.myBid) <= Integer.parseInt(company_decision));
+                                this.driver.state = State.BIDDING_FOR_PASSENGER;
+                            }
+                        }
+                    
                     }
                 }
                     

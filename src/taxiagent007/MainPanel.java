@@ -213,16 +213,16 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(taxi_state_panel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(play_btn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 126, Short.MAX_VALUE)
-                        .addComponent(force_call_btn))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(company_label)
                             .addComponent(calls_label)
                             .addComponent(company_state_label)
-                            .addComponent(company_profit_label))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                            .addComponent(company_profit_label)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(play_btn)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(force_call_btn)))
+                        .addGap(0, 120, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -440,7 +440,12 @@ public class MainPanel extends javax.swing.JFrame implements ActionListener {
         this.lambda_label.setText( "λ = " + this.city.lambda);
         this.poisson_label.setText( "p(" + this.city.k + ") = " + city.poisson(this.city.k ) );
         this.calls_label.setText(city.totalCalls + " call(s) (" + city.callsHour + " call(s) in last hour)" );
-        this.totalminutes_label.setText( MainPanel.total_seconds + " second(s) in total");
+        
+        int days = MainPanel.total_seconds/86400;
+        int hours = (MainPanel.total_seconds%86400)/3600;
+        
+        
+        this.totalminutes_label.setText( days + " day(s) " + hours + " hour(s) in total");
         this.animdelay_label.setText( "Animation delay: " + this.anim_slider.getValue() + "ms");
         this.frame_label.setText( "Frame: " + MainPanel.frame + " seconds");
         this.gaskm_label.setText("Gas/KM: NT$" + this.company.gas_cost_km*7);

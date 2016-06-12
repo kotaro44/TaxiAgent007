@@ -30,6 +30,7 @@ public class Driver extends Agent {
     public boolean working = false;
     public int cantBidIn = 0;
     public int bidIncrease = 2;
+    public boolean silent_biding = false;
     
     Behaviour main_behaviour;
     
@@ -102,11 +103,11 @@ public class Driver extends Agent {
     
     
     public void bid( ACLMessage msg , double bidValue , double maxPayOff , Request new_request ) {
-        try {
+        /*try {
             Thread.sleep(10);
         } catch (InterruptedException ex) {
             Logger.getLogger(Driver.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
         
         this.last_profit = maxPayOff;
         ACLMessage reply = msg.createReply();
@@ -120,17 +121,25 @@ public class Driver extends Agent {
             // - I won a bid recently 
             System.out.println("Driver " + this.index + ": I won a bid recently");
             reply.setContent(this.index + ":0");
-        } else if( bidValue >= maxPayOff-1 ){
-            // - My Bid is bigger than my max Profit
-            System.out.println("Driver " + this.index + ": the big is too high for me");
-            reply.setContent(this.index + ":0");
-        } else if ( maxPayOff <= 0 ){
-            // - I can't get profit from the task
-            System.out.println("Driver " + this.index + ": I can't get any profit from that request");
-            reply.setContent(this.index + ":0");
-        } else{
-            reply.setContent(this.index + ":" + (maxPayOff - bidValue) );
-            this.last_max_bid = (maxPayOff - bidValue);
+        } else {
+            
+            if( bidValue >= maxPayOff-1 ){
+                // - My Bid is bigger than my max Profit
+                System.out.println("Driver " + this.index + ": the bid is too low for me");
+                reply.setContent(this.index + ":0");
+            } else if ( maxPayOff <= 0 ){
+                // - I can't get profit from the task
+                System.out.println("Driver " + this.index + ": I can't get any profit from that request");
+                reply.setContent(this.index + ":0");
+            } else{
+                if( Company.Vickrey ){
+                    reply.setContent(this.index + ":" + bidValue );
+                    this.last_max_bid = bidValue;
+                }else{
+                    reply.setContent(this.index + ":" + (maxPayOff - bidValue) );
+                    this.last_max_bid = (maxPayOff - bidValue);
+                }
+            }
         }
         
         this.send(reply);

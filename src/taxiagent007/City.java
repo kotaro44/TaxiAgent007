@@ -32,7 +32,7 @@ public class City extends JPanel {
     private int w;
     private Image[] textures;
     private String[] textures_path = {"road.jpg","roof1.jpg",
-        "roof2.jpg","grass.jpg","roof3.jpg"};
+        "roof2.jpg","grass.jpg","roof3.jpg","roof4.jpg","roof5.jpg","roof6.jpg"};
     private ArrayList<Passenger> passengers = new ArrayList<>();
     public Company company;
     ArrayList<Road> edges;
@@ -130,8 +130,29 @@ public class City extends JPanel {
                                  {88,37,5,8,0},
                                 {59,37,19,8,1},
                                 {59,2,19,8,1},
-                                {17,37,5,8,3},
-                                {30,37,5,8,0},
+                                {17,37,5,8,0},
+                                {31,37,5,8,3},
+                                {45,2,5,8,3},
+                                {45,37,5,8,4},
+                                {45,30,4,1,4},
+                                {31,30,4,1,1},
+                                {17,30,4,1,5},
+                                {2,30,5,1,5},
+                                
+                                {17,16,19,1,5},
+                                {2,16,5,1,1},
+                                
+                                {17,23,19,1,4},
+                                {2,23,5,1,6},
+                                
+                                {59,16,19,1,6},
+                                {59,23,19,1,5},
+                                {59,30,19,1,5},
+                                
+                                {88,16,5,1,5},
+                                {88,23,5,1,6},
+                                {88,30,5,1,5},
+                                
                                 {17,2,19,8,1}}; 
     
     private static Font monoFont = new Font("Monospaced", Font.BOLD , 18);

@@ -24,8 +24,10 @@ import java.util.Queue;
  * @author kotaro and fabio :)
  */
 public class Company extends Agent {
-    public State state = State.PREPARING;
     
+    public static boolean Vickrey = false;
+    
+    public State state = State.PREPARING;
     boolean ready = false;
     MainPanel mainpanel;
     ArrayList<Taxi> taxis = new ArrayList<>();
@@ -79,7 +81,7 @@ public class Company extends Agent {
                 
                 //delay propositado para os agents nao acessarem this.taxis ao mesmo tempo
                 try {
-                    Thread.sleep(500);                 //1000 milliseconds is one second.
+                    Thread.sleep(100);                 //1000 milliseconds is one second.
                     } catch(InterruptedException ex) {
                         Thread.currentThread().interrupt();
                     }
@@ -100,6 +102,13 @@ public class Company extends Agent {
     @Override
      protected void setup() {
         System.out.println("Company Agent started!");
+        Object[] args = getArguments();
+        if( Integer.parseInt((String)args[0]) == 1 ){
+            System.out.println("-----Starting as Vickey Auction Mechanism!-----");
+            Company.Vickrey = true;
+        }else{
+            System.out.println("-----Starting as Lowest Bid Auction Mechanism!-----");
+        }
         MainPanel.jade_main(this);
     }
      
